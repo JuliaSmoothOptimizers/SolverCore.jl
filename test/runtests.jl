@@ -1,5 +1,5 @@
 # This package
-using SolverTools
+using SolverCore
 
 # Auxiliary packages
 using ADNLPModels, NLPModels
@@ -9,8 +9,5 @@ using LinearAlgebra, Logging, Test
 
 include("dummy_solver.jl")
 
-include("test_auxiliary.jl")
-include("test_linesearch.jl")
 include("test_logging.jl")
 include("test_stats.jl")
-include("test_trust_region.jl")
