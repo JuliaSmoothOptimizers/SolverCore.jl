@@ -1,6 +1,6 @@
 {
-  "description": "Tools for developing nonlinear optimization solvers in Julia",
-  "title": "SolverTools.jl",
+  "description": "Core Definitions for Developing Nonlinear Optimization Solvers",
+  "title": "SolverCore.jl",
   "upload_type": "software",
   "license": "MPL-2.0",
   "creators": [
@@ -17,7 +17,7 @@
   "related_identifiers": [
     {
       "scheme": "url",
-      "identifier": "https://github.com/JuliaSmoothOptimizers/SolverTools.jl/releases/latest",
+      "identifier": "https://github.com/JuliaSmoothOptimizers/SolverCore.jl/releases/latest",
       "relation": "isSupplementTo"
     }
   ],

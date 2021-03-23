@@ -31,8 +31,8 @@ end
     log_header(colnames, coltypes)
 
 Creates a header using the names in `colnames` formatted according to the types in `coltypes`.
-Uses internal formatting specification given by `SolverTools.formats` and default header
-translation given by `SolverTools.default_headers`.
+Uses internal formatting specification given by `SolverCore.formats` and default header
+translation given by `SolverCore.default_headers`.
 
 Input:
 - `colnames::Vector{Symbol}`: Column names.
@@ -67,7 +67,7 @@ end
 
 Creates a table row from the values on `vals` according to their types. Pass the names
 and types of `vals` to [`log_header`](@ref) for a logging table. Uses internal formatting
-specification given by `SolverTools.formats`.
+specification given by `SolverCore.formats`.
 
 To handle a missing value, add the type instead of the number:
 

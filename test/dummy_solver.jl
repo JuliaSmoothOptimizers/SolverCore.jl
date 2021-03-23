@@ -1,10 +1,11 @@
-function dummy_solver(nlp :: AbstractNLPModel;
-                      x :: AbstractVector = nlp.meta.x0,
-                      atol :: Real = sqrt(eps(eltype(x))),
-                      rtol :: Real = sqrt(eps(eltype(x))),
-                      max_eval :: Int = 1000,
-                      max_time :: Float64 = 30.0,
-                     )
+function dummy_solver(
+  nlp :: AbstractNLPModel;
+  x :: AbstractVector = nlp.meta.x0,
+  atol :: Real = sqrt(eps(eltype(x))),
+  rtol :: Real = sqrt(eps(eltype(x))),
+  max_eval :: Int = 1000,
+  max_time :: Float64 = 30.0,
+)
 
   start_time = time()
   elapsed_time = 0.0
@@ -61,9 +62,17 @@ function dummy_solver(nlp :: AbstractNLPModel;
     :max_eval
   end
 
-  return GenericExecutionStats(:unknown, nlp,
-                               objective=fx, dual_feas=norm(dual), primal_feas=norm(cx),
-                               multipliers=y, multipliers_L=zeros(T, nvar), multipliers_U=zeros(T, nvar),
-                               elapsed_time=elapsed_time, solution=x, iter=iter
-                              )
+  return GenericExecutionStats(
+    :unknown,
+    nlp,
+    objective=fx,
+    dual_feas=norm(dual),
+    primal_feas=norm(cx),
+    multipliers=y,
+    multipliers_L=zeros(T, nvar),
+    multipliers_U=zeros(T, nvar),
+    elapsed_time=elapsed_time,
+    solution=x,
+    iter=iter
+  )
 end

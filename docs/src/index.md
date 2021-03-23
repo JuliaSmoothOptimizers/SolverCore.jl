@@ -1,4 +1,3 @@
-# [SolverTools.jl documentation](@id Home)
+# [SolverCore.jl documentation](@id Home)
 
-This package provides tools for developing nonlinear optimization solvers.
-
+Core package to build novel optimization algorithms in Julia.

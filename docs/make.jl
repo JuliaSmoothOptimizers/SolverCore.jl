@@ -1,12 +1,12 @@
-using Documenter, SolverTools
+using Documenter, SolverCore
 
 makedocs(
-  modules = [SolverTools],
+  modules = [SolverCore],
   doctest = true,
   linkcheck = true,
   strict = true,
   format = Documenter.HTML(assets = ["assets/style.css"], prettyurls = get(ENV, "CI", nothing) == "true"),
-  sitename = "SolverTools.jl",
+  sitename = "SolverCore.jl",
   pages = ["Home" => "index.md",
            "API" => "api.md",
            "Reference" => "reference.md",
@@ -14,7 +14,7 @@ makedocs(
 )
 
 deploydocs(
-  repo = "github.com/JuliaSmoothOptimizers/SolverTools.jl.git",
+  repo = "github.com/JuliaSmoothOptimizers/SolverCore.jl.git",
   push_preview = true,
   devbranch = "master"
 )
