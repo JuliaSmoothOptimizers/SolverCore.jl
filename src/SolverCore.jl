@@ -1,12 +1,16 @@
 module SolverCore
 
 # stdlib
-using Printf
+using Logging, Printf
+using OrderedCollections
 
-# our packages
-using NLPModels
+include("solver.jl")
+include("output.jl")
 
 include("logger.jl")
-include("stats.jl")
+include("parameters.jl")
+include("traits.jl")
+
+include("grid-search-tuning.jl")
 
 end
