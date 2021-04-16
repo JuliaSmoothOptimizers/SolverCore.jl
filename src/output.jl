@@ -2,14 +2,16 @@ export AbstractSolverOutput
 
 # TODO: Define the required fields and API for all Outputs
 """
-    AbstractSolverOutput{T}
+    AbstractSolverOutput{T,S}
 
 Base type for output of JSO-compliant solvers.
 An output must have at least the following:
 - `status :: Symbol`
 - `solution`
+
+The type `T` is used for element types of the arrays, and `S` is used for the storage container type.
 """
-abstract type AbstractSolverOutput{T} end
+abstract type AbstractSolverOutput{T, S} end
 
 # TODO: Decision: Should STATUSES be fixed? Should it be all here?
 const STATUSES = Dict(

@@ -20,7 +20,7 @@
   end
 
   # Output
-  mutable struct RFPOutput{T} <: AbstractSolverOutput{T}
+  mutable struct RFPOutput{T} <: AbstractSolverOutput{T, T}
     status::Symbol
     solution::T
     fx::T
@@ -38,7 +38,7 @@
   end
 
   # Solver
-  mutable struct Bissection{T} <: AbstractSolver{T}
+  mutable struct Bissection{T} <: AbstractSolver{T, T}
     initialized::Bool
     params::Dict
     workspace
