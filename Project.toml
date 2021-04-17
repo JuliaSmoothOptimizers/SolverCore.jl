@@ -1,6 +1,6 @@
 name = "SolverCore"
 uuid = "ff4d7338-4cf1-434d-91df-b86cb86fb843"
-version = "0.1.0"
+version = "0.2.0-dev"
 
 [deps]
 Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
