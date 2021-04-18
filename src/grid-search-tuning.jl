@@ -49,6 +49,10 @@ function grid_search_tune(
       params[k] = (false, true)
     elseif v[:type] <: Integer
       params[k] = v[:min]:v[:max]
+    elseif v[:type] == Symbol || v[:type] <: AbstractString
+      params[k] = v[:options]
+    else
+      error(ArgumentError("Unexpected parameter type for $k: type = $(v[:type])"))
     end
   end
   for (k, v) in kwargs
