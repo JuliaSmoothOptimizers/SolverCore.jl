@@ -1,7 +1,6 @@
-export grid_search_tune
+export grid_search_tune, reset_problem!
 
-# TODO: Issue: For grid_search_tune to work, we need to define `reset!`, but LinearOperators also define reset!
-function reset! end
+function reset_problem! end
 
 # TODO: Decide success and costs of grid_search_tune below
 
@@ -70,7 +69,7 @@ function grid_search_tune(
   cost(θ) = begin
     total_cost = [zero(x[2]) for x in costs]
     for problem in problems
-      reset!(problem)
+      reset_problem!(problem)
       try
         solver = Solver(problem)
         P = (k => θi for (k, θi) in zip(keys(solver_params), θ))

@@ -15,7 +15,7 @@
     rfp.evals += 1
     rfp.f(x)
   end
-  function SolverCore.reset!(rfp::RootFindingProblem{T}) where {T}
+  function SolverCore.reset_problem!(rfp::RootFindingProblem{T}) where {T}
     rfp.evals = 0
   end
 
