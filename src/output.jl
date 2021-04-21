@@ -1,4 +1,7 @@
-export AbstractSolverOutput
+export AbstractSolverOutput, solver_output_type
+
+solver_output_type(::Type{S}) where S <: AbstractSolver = error("Output type not defined for $S")
+solver_output_type(::S) where S <: AbstractSolver = solver_output_type(S)
 
 # TODO: Define the required fields and API for all Outputs
 """

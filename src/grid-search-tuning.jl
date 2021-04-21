@@ -1,7 +1,5 @@
 export grid_search_tune, reset_problem!
 
-function reset_problem! end
-
 # TODO: Decide success and costs of grid_search_tune below
 
 """

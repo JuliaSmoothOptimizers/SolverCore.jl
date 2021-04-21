@@ -4,6 +4,7 @@ module SolverCore
 using Logging, Printf
 using OrderedCollections
 
+include("problem.jl")
 include("solver.jl")
 include("output.jl")
 

@@ -44,7 +44,9 @@
     workspace
   end
 
-  function Bissection(
+  SolverCore.solver_output_type(::Type{Bissection{T}}) where T = RFPOutput{T}
+
+  function Bissection{T}(
     rfp::RootFindingProblem{T};
     θ = one(T) / 2,
     δ = one(T),
@@ -53,6 +55,8 @@
   ) where {T}
     Bissection{T}(true, Dict(:θ => θ, :δ => δ, :explorer => true, :explorer_tries => 3), [])
   end
+
+  Bissection(rfp::RootFindingProblem{T}; kwargs...) where {T} = Bissection{T}(rfp; kwargs...)
 
   SolverCore.parameters(::Type{Bissection{T}}) where {T} = (
     θ = (default = one(T) / 2, type = T, scale = :linear, min = T(0.1), max = T(0.9)),
@@ -135,6 +139,13 @@
     solver = Bissection(f, θ = 0.1)
     output = solve!(solver, f)
     @test abs(output.fx) < 1e-2
+  end
+
+  for T in [Float16, Float32, Float64, BigFloat]
+    @test solver_output_type(Bissection{T}) == RFPOutput{T}
+    f = RootFindingProblem(x -> x, one(T))
+    solver = Bissection(f)
+    @test solver_output_type(solver) == RFPOutput{T}
   end
 
   # Tuning

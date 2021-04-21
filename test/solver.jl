@@ -8,8 +8,10 @@
     @test String(take!(io)) == "Solver NoSolver{Float64, Vector{Float64}}\n"
   end
 
-  @testset "solve! not implemented" begin
+  @testset "Not implemented" begin
     @test_throws MethodError solve!(solver, 0)
+    @test_throws ErrorException solver_output_type(solver)
+    @test_throws ErrorException solver_output_type(NoSolver)
   end
 
   @testset "Parameters" begin
