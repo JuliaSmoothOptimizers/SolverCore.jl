@@ -1,17 +1,20 @@
 export log_header, log_row
 
-const formats = Dict{DataType, String}(Signed => "%6d",
-                                       AbstractFloat => "%8.1e",
-                                       AbstractString => "%15s",
-                                       Symbol => "%15s",
-                                       Missing => "%15s"
-                                      )
+const formats = Dict{DataType, String}(
+  Signed => "%6d",
+  AbstractFloat => "%8.1e",
+  AbstractString => "%15s",
+  Symbol => "%15s",
+  Missing => "%15s",
+)
 
-const default_headers = Dict{Symbol, String}(:name => "Name",
-                                             :elapsed_time => "Time",
-                                             :objective => "f(x)",
-                                             :dual_feas => "Dual",
-                                             :primal_feas => "Primal")
+const default_headers = Dict{Symbol, String}(
+  :name => "Name",
+  :elapsed_time => "Time",
+  :objective => "f(x)",
+  :dual_feas => "Dual",
+  :primal_feas => "Primal",
+)
 
 for (typ, fmt) in formats
   hdr_fmt_foo = Symbol("header_formatter_$typ")
@@ -19,11 +22,11 @@ for (typ, fmt) in formats
   fmt2 = "%$(len)s"
 
   @eval begin
-    row_formatter(x :: $typ) = @sprintf($fmt, x)
-    row_formatter(:: Type{<:$typ}) = @sprintf($fmt2, "-")
+    row_formatter(x::$typ) = @sprintf($fmt, x)
+    row_formatter(::Type{<:$typ}) = @sprintf($fmt2, "-")
 
     $hdr_fmt_foo(x) = @sprintf($fmt2, x)
-    header_formatter(x :: Union{Symbol,String}, :: Type{<:$typ}) = $hdr_fmt_foo(x)
+    header_formatter(x::Union{Symbol, String}, ::Type{<:$typ}) = $hdr_fmt_foo(x)
   end
 end
 
@@ -44,11 +47,13 @@ Keyword arguments:
 
 See also [`log_row`](@ref).
 """
-function log_header(colnames :: AbstractVector{Symbol}, coltypes :: AbstractVector{DataType};
-                    hdr_override :: Dict{Symbol,String} = Dict{Symbol,String}(),
-                    colsep :: Int = 2,
-                   )
-  out = ""
+function log_header(
+  colnames::AbstractVector{Symbol},
+  coltypes::AbstractVector{DataType};
+  hdr_override::Dict{Symbol, String} = Dict{Symbol, String}(),
+  colsep::Int = 2,
+)
+  out_vec = String[]
   for (name, typ) in zip(colnames, coltypes)
     x = if haskey(hdr_override, name)
       hdr_override[name]
@@ -57,9 +62,9 @@ function log_header(colnames :: AbstractVector{Symbol}, coltypes :: AbstractVect
     else
       string(name)
     end
-    out *= header_formatter(x, typ) * " "^colsep
+    push!(out_vec, header_formatter(x, typ))
   end
-  return out
+  return join(out_vec, " "^colsep)
 end
 
 """
@@ -82,7 +87,7 @@ Prints
 Keyword arguments:
 - `colsep::Int`: Number of spaces between columns (Default: 2)
 """
-function log_row(vals; colsep :: Int = 2)
+function log_row(vals; colsep::Int = 2)
   string_cols = (row_formatter(val) for val in vals)
   return join(string_cols, " "^colsep)
 end
