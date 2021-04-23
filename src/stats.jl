@@ -1,23 +1,23 @@
-export AbstractExecutionStats, GenericExecutionStats,
-       statsgetfield, statshead, statsline, getStatus, show_statuses
+export AbstractExecutionStats,
+  GenericExecutionStats, statsgetfield, statshead, statsline, getStatus, show_statuses
 
 const STATUSES = Dict(
-        :exception      => "unhandled exception",
-        :first_order    => "first-order stationary",
-        :acceptable     => "solved to within acceptable tolerances",
-        :infeasible     => "problem may be infeasible",
-        :max_eval       => "maximum number of function evaluations",
-        :max_iter       => "maximum iteration",
-        :max_time       => "maximum elapsed time",
-        :neg_pred       => "negative predicted reduction",
-        :not_desc       => "not a descent direction",
-        :small_residual => "small residual",
-        :small_step     => "step too small",
-        :stalled        => "stalled",
-        :unbounded      => "objective function may be unbounded from below",
-        :unknown        => "unknown",
-        :user           => "user-requested stop",
-       )
+  :exception => "unhandled exception",
+  :first_order => "first-order stationary",
+  :acceptable => "solved to within acceptable tolerances",
+  :infeasible => "problem may be infeasible",
+  :max_eval => "maximum number of function evaluations",
+  :max_iter => "maximum iteration",
+  :max_time => "maximum elapsed time",
+  :neg_pred => "negative predicted reduction",
+  :not_desc => "not a descent direction",
+  :small_residual => "small residual",
+  :small_step => "step too small",
+  :stalled => "stalled",
+  :unbounded => "objective function may be unbounded from below",
+  :unknown => "unknown",
+  :user => "user-requested stop",
+)
 
 """
     show_statuses()
@@ -58,34 +58,40 @@ All other variables can be input as keyword arguments.
 Notice that `GenericExecutionStats` does not compute anything, it simply stores.
 """
 mutable struct GenericExecutionStats <: AbstractExecutionStats
-  status :: Symbol
-  solution :: Vector # x
-  objective :: Real # f(x)
-  dual_feas :: Real # ‖∇f(x)‖₂ for unc, ‖P[x - ∇f(x)] - x‖₂ for bnd, etc.
-  primal_feas :: Real # ‖c(x)‖ for equalities
-  multipliers :: Vector # y
-  multipliers_L :: Vector # zL
-  multipliers_U :: Vector # zU
-  iter :: Int
-  counters :: NLPModels.NLSCounters
-  elapsed_time :: Real
-  solver_specific :: Dict{Symbol,Any}
+  status::Symbol
+  solution::Vector # x
+  objective::Real # f(x)
+  dual_feas::Real # ‖∇f(x)‖₂ for unc, ‖P[x - ∇f(x)] - x‖₂ for bnd, etc.
+  primal_feas::Real # ‖c(x)‖ for equalities
+  multipliers::Vector # y
+  multipliers_L::Vector # zL
+  multipliers_U::Vector # zU
+  iter::Int
+  counters::NLPModels.NLSCounters
+  elapsed_time::Real
+  solver_specific::Dict{Symbol, Any}
 end
 
-function GenericExecutionStats(status :: Symbol,
-                               nlp :: AbstractNLPModel;
-                               solution :: Vector=eltype(nlp.meta.x0)[],
-                               objective :: Real=eltype(solution)(Inf),
-                               dual_feas :: Real=eltype(solution)(Inf),
-                               primal_feas :: Real=unconstrained(nlp) || bound_constrained(nlp) ? zero(eltype(solution)) : eltype(solution)(Inf),
-                               multipliers :: Vector=eltype(nlp.meta.x0)[],
-                               multipliers_L :: Vector=eltype(nlp.meta.x0)[],
-                               multipliers_U :: Vector=eltype(nlp.meta.x0)[],
-                               iter :: Int=-1,
-                               elapsed_time :: Real=Inf,
-                               solver_specific :: Dict{Symbol,T}=Dict{Symbol,Any}()) where {T}
+function GenericExecutionStats(
+  status::Symbol,
+  nlp::AbstractNLPModel;
+  solution::Vector = eltype(nlp.meta.x0)[],
+  objective::Real = eltype(solution)(Inf),
+  dual_feas::Real = eltype(solution)(Inf),
+  primal_feas::Real = unconstrained(nlp) || bound_constrained(nlp) ? zero(eltype(solution)) :
+                      eltype(solution)(Inf),
+  multipliers::Vector = eltype(nlp.meta.x0)[],
+  multipliers_L::Vector = eltype(nlp.meta.x0)[],
+  multipliers_U::Vector = eltype(nlp.meta.x0)[],
+  iter::Int = -1,
+  elapsed_time::Real = Inf,
+  solver_specific::Dict{Symbol, T} = Dict{Symbol, Any}(),
+) where {T}
   if !(status in keys(STATUSES))
-    @error "status $status is not a valid status. Use one of the following: " join(keys(STATUSES), ", ")
+    @error "status $status is not a valid status. Use one of the following: " join(
+      keys(STATUSES),
+      ", ",
+    )
     throw(KeyError(status))
   end
   c = NLSCounters()
@@ -98,19 +104,30 @@ function GenericExecutionStats(status :: Symbol,
       setfield!(c, counter, eval(Meta.parse("$counter"))(nlp))
     end
   end
-  return GenericExecutionStats(status, solution, objective, dual_feas, primal_feas,
-                               multipliers, multipliers_L, multipliers_U, iter,
-                               c, elapsed_time, solver_specific)
+  return GenericExecutionStats(
+    status,
+    solution,
+    objective,
+    dual_feas,
+    primal_feas,
+    multipliers,
+    multipliers_L,
+    multipliers_U,
+    iter,
+    c,
+    elapsed_time,
+    solver_specific,
+  )
 end
 
 import Base.show, Base.print, Base.println
 
-function show(io :: IO, stats :: AbstractExecutionStats)
+function show(io::IO, stats::AbstractExecutionStats)
   show(io, "Execution stats: $(getStatus(stats))")
 end
 
 # TODO: Expose NLPModels dsp in nlp_types.jl function print
-function disp_vector(io :: IO, x :: Vector)
+function disp_vector(io::IO, x::Vector)
   if length(x) == 0
     print(io, "∅")
   elseif length(x) <= 5
@@ -121,22 +138,27 @@ function disp_vector(io :: IO, x :: Vector)
   end
 end
 
-function print(io :: IO, stats :: GenericExecutionStats; showvec :: Function=disp_vector)
+function print(io::IO, stats::GenericExecutionStats; showvec::Function = disp_vector)
   # TODO: Show evaluations
   println(io, "Generic Execution stats")
   println(io, "  status: " * getStatus(stats))
   println(io, "  objective value: ", stats.objective)
   println(io, "  primal feasibility: ", stats.primal_feas)
   println(io, "  dual feasibility: ", stats.dual_feas)
-  print(io, "  solution: "); showvec(io, stats.solution); println(io, "")
-  length(stats.multipliers) > 0 && (print(io, "  multipliers: "); showvec(io, stats.multipliers); println(io, ""))
-  length(stats.multipliers_L) > 0 && (print(io, "  multipliers_L: "); showvec(io, stats.multipliers_L); println(io, ""))
-  length(stats.multipliers_U) > 0 && (print(io, "  multipliers_U: "); showvec(io, stats.multipliers_U); println(io, ""))
+  print(io, "  solution: ")
+  showvec(io, stats.solution)
+  println(io, "")
+  length(stats.multipliers) > 0 &&
+    (print(io, "  multipliers: "); showvec(io, stats.multipliers); println(io, ""))
+  length(stats.multipliers_L) > 0 &&
+    (print(io, "  multipliers_L: "); showvec(io, stats.multipliers_L); println(io, ""))
+  length(stats.multipliers_U) > 0 &&
+    (print(io, "  multipliers_U: "); showvec(io, stats.multipliers_U); println(io, ""))
   println(io, "  iterations: ", stats.iter)
   println(io, "  elapsed time: ", stats.elapsed_time)
   if length(stats.solver_specific) > 0
     println(io, "  solver specific:")
-    for (k,v) in stats.solver_specific
+    for (k, v) in stats.solver_specific
       @printf(io, "    %s: ", k)
       if v isa Vector
         showvec(io, v)
@@ -147,31 +169,33 @@ function print(io :: IO, stats :: GenericExecutionStats; showvec :: Function=dis
     end
   end
 end
-print(stats :: GenericExecutionStats; showvec :: Function=disp_vector) =
-    print(Base.stdout, stats, showvec=showvec)
-println(io :: IO, stats :: GenericExecutionStats; showvec ::
-        Function=disp_vector) = print(io, stats, showvec=showvec)
-println(stats :: GenericExecutionStats; showvec :: Function=disp_vector) =
-    print(Base.stdout, stats, showvec=showvec)
+print(stats::GenericExecutionStats; showvec::Function = disp_vector) =
+  print(Base.stdout, stats, showvec = showvec)
+println(io::IO, stats::GenericExecutionStats; showvec::Function = disp_vector) =
+  print(io, stats, showvec = showvec)
+println(stats::GenericExecutionStats; showvec::Function = disp_vector) =
+  print(Base.stdout, stats, showvec = showvec)
 
-const headsym = Dict(:status       => "  Status",
-                     :iter         => "   Iter",
-                     :neval_obj    => "   #obj",
-                     :neval_grad   => "  #grad",
-                     :neval_cons   => "  #cons",
-                     :neval_jcon   => "  #jcon",
-                     :neval_jgrad  => " #jgrad",
-                     :neval_jac    => "   #jac",
-                     :neval_jprod  => " #jprod",
-                     :neval_jtprod => "#jtprod",
-                     :neval_hess   => "  #hess",
-                     :neval_hprod  => " #hprod",
-                     :neval_jhprod => "#jhprod",
-                     :objective    => "              f",
-                     :dual_feas    => "           ‖∇f‖",
-                     :elapsed_time => "  Elaspsed time")
+const headsym = Dict(
+  :status => "  Status",
+  :iter => "   Iter",
+  :neval_obj => "   #obj",
+  :neval_grad => "  #grad",
+  :neval_cons => "  #cons",
+  :neval_jcon => "  #jcon",
+  :neval_jgrad => " #jgrad",
+  :neval_jac => "   #jac",
+  :neval_jprod => " #jprod",
+  :neval_jtprod => "#jtprod",
+  :neval_hess => "  #hess",
+  :neval_hprod => " #hprod",
+  :neval_jhprod => "#jhprod",
+  :objective => "              f",
+  :dual_feas => "           ‖∇f‖",
+  :elapsed_time => "  Elaspsed time",
+)
 
-function statsgetfield(stats :: AbstractExecutionStats, name :: Symbol)
+function statsgetfield(stats::AbstractExecutionStats, name::Symbol)
   t = Int
   if name == :status
     v = getStatus(stats)
@@ -199,14 +223,14 @@ function statsgetfield(stats :: AbstractExecutionStats, name :: Symbol)
   end
 end
 
-function statshead(line :: Array{Symbol})
+function statshead(line::Array{Symbol})
   return join([headsym[x] for x in line], "  ")
 end
 
-function statsline(stats :: AbstractExecutionStats, line :: Array{Symbol})
+function statsline(stats::AbstractExecutionStats, line::Array{Symbol})
   return join([statsgetfield(stats, x) for x in line], "  ")
 end
 
-function getStatus(stats :: AbstractExecutionStats)
+function getStatus(stats::AbstractExecutionStats)
   return STATUSES[stats.status]
 end
