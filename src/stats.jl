@@ -57,15 +57,15 @@ All other variables can be input as keyword arguments.
 
 Notice that `GenericExecutionStats` does not compute anything, it simply stores.
 """
-mutable struct GenericExecutionStats <: AbstractExecutionStats
+mutable struct GenericExecutionStats{T, V} <: AbstractExecutionStats
   status::Symbol
-  solution::Vector # x
-  objective::Real # f(x)
-  dual_feas::Real # ‖∇f(x)‖₂ for unc, ‖P[x - ∇f(x)] - x‖₂ for bnd, etc.
-  primal_feas::Real # ‖c(x)‖ for equalities
-  multipliers::Vector # y
-  multipliers_L::Vector # zL
-  multipliers_U::Vector # zU
+  solution::V # x
+  objective::T # f(x)
+  dual_feas::T # ‖∇f(x)‖₂ for unc, ‖P[x - ∇f(x)] - x‖₂ for bnd, etc.
+  primal_feas::T # ‖c(x)‖ for equalities
+  multipliers # y
+  multipliers_L # zL
+  multipliers_U # zU
   iter::Int
   counters::NLPModels.NLSCounters
   elapsed_time::Real
@@ -75,18 +75,18 @@ end
 function GenericExecutionStats(
   status::Symbol,
   nlp::AbstractNLPModel;
-  solution::Vector = eltype(nlp.meta.x0)[],
-  objective::Real = eltype(solution)(Inf),
-  dual_feas::Real = eltype(solution)(Inf),
-  primal_feas::Real = unconstrained(nlp) || bound_constrained(nlp) ? zero(eltype(solution)) :
+  solution::AbstractArray{T} = eltype(nlp.meta.x0)[],
+  objective::T = eltype(solution)(Inf),
+  dual_feas::T = eltype(solution)(Inf),
+  primal_feas::T = unconstrained(nlp) || bound_constrained(nlp) ? zero(eltype(solution)) :
                       eltype(solution)(Inf),
-  multipliers::Vector = eltype(nlp.meta.x0)[],
-  multipliers_L::Vector = eltype(nlp.meta.x0)[],
-  multipliers_U::Vector = eltype(nlp.meta.x0)[],
+  multipliers::AbstractArray{T} = eltype(nlp.meta.x0)[],
+  multipliers_L::AbstractArray{T} = eltype(nlp.meta.x0)[],
+  multipliers_U::AbstractArray{T} = eltype(nlp.meta.x0)[],
   iter::Int = -1,
   elapsed_time::Real = Inf,
-  solver_specific::Dict{Symbol, T} = Dict{Symbol, Any}(),
-) where {T}
+  solver_specific::Dict{Symbol, Tsp} = Dict{Symbol, Any}(),
+) where {T<:Real, Tsp}
   if !(status in keys(STATUSES))
     @error "status $status is not a valid status. Use one of the following: " join(
       keys(STATUSES),
@@ -104,7 +104,8 @@ function GenericExecutionStats(
       setfield!(c, counter, eval(Meta.parse("$counter"))(nlp))
     end
   end
-  return GenericExecutionStats(
+  V = typeof(solution)
+  return GenericExecutionStats{T, V}(
     status,
     solution,
     objective,
