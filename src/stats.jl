@@ -128,7 +128,7 @@ function show(io::IO, stats::AbstractExecutionStats)
 end
 
 # TODO: Expose NLPModels dsp in nlp_types.jl function print
-function disp_vector(io::IO, x::Vector)
+function disp_vector(io::IO, x::AbstractArray)
   if length(x) == 0
     print(io, "∅")
   elseif length(x) <= 5
