@@ -72,21 +72,26 @@ mutable struct GenericExecutionStats{T, V} <: AbstractExecutionStats
   solver_specific::Dict{Symbol, Any}
 end
 
-function GenericExecutionStats(
+function GenericExecutionStats(status::Symbol, nlp::AbstractNLPModel; kwargs...)
+	T = eltype(nlp.meta.x0)
+	V = typeof(nlp.meta.x0)
+	return GenericExecutionStats{T, V}(status, nlp; kwargs...)
+end
+
+function GenericExecutionStats{T, V}(
   status::Symbol,
   nlp::AbstractNLPModel;
-  solution::AbstractArray{T} = eltype(nlp.meta.x0)[],
-  objective::T = eltype(solution)(Inf),
-  dual_feas::T = eltype(solution)(Inf),
-  primal_feas::T = unconstrained(nlp) || bound_constrained(nlp) ? zero(eltype(solution)) :
-                      eltype(solution)(Inf),
-  multipliers::AbstractArray{T} = eltype(nlp.meta.x0)[],
-  multipliers_L::AbstractArray{T} = eltype(nlp.meta.x0)[],
-  multipliers_U::AbstractArray{T} = eltype(nlp.meta.x0)[],
+  solution::V = T[],
+  objective::T = T(Inf),
+  dual_feas::T = T(Inf),
+  primal_feas::T = unconstrained(nlp) || bound_constrained(nlp) ? zero(T) : T(Inf),
+  multipliers::AbstractArray = V(undef, 0),
+  multipliers_L::AbstractArray = V(undef, 0),
+  multipliers_U::AbstractArray = V(undef, 0),
   iter::Int = -1,
   elapsed_time::Real = Inf,
   solver_specific::Dict{Symbol, Tsp} = Dict{Symbol, Any}(),
-) where {T<:Real, Tsp}
+) where {T, V, Tsp}
   if !(status in keys(STATUSES))
     @error "status $status is not a valid status. Use one of the following: " join(
       keys(STATUSES),
@@ -104,7 +109,6 @@ function GenericExecutionStats(
       setfield!(c, counter, eval(Meta.parse("$counter"))(nlp))
     end
   end
-  V = typeof(solution)
   return GenericExecutionStats{T, V}(
     status,
     solution,
