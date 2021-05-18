@@ -72,10 +72,14 @@ mutable struct GenericExecutionStats{T, V} <: AbstractExecutionStats
   solver_specific::Dict{Symbol, Any}
 end
 
-function GenericExecutionStats(status::Symbol, nlp::AbstractNLPModel; kwargs...)
-	T = eltype(nlp.meta.x0)
-	V = typeof(nlp.meta.x0)
-	return GenericExecutionStats{T, V}(status, nlp; kwargs...)
+function GenericExecutionStats(
+  status::Symbol,
+  nlp::AbstractNLPModel;
+  solution::V = eltype(nlp.meta.x0)[],
+  kwargs...
+) where V
+	T = eltype(solution)
+	return GenericExecutionStats{T, V}(status, nlp; solution=solution, kwargs...)
 end
 
 function GenericExecutionStats{T, V}(
