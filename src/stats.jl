@@ -74,11 +74,10 @@ end
 
 function GenericExecutionStats(
   status::Symbol,
-  nlp::AbstractNLPModel;
-  solution::V = eltype(nlp.meta.x0)[],
+  nlp::AbstractNLPModel{T, S};
+  solution::V = T[],
   kwargs...,
-) where {V}
-  T = eltype(solution)
+) where {S, T, V}
   return GenericExecutionStats{T, V}(status, nlp; solution = solution, kwargs...)
 end
 

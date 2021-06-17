@@ -48,7 +48,7 @@ function test_stats()
       @test typeof(stats.dual_feas) == T
       @test typeof(stats.primal_feas) == T
 
-      nlp = ADNLPModel(x -> dot(x, x), ones(T, 2), x -> [sum(x) - 1], [0.0], [0.0])
+      nlp = ADNLPModel(x -> dot(x, x), ones(T, 2), x -> [sum(x) - 1], T[0], T[0])
 
       stats = GenericExecutionStats(:first_order, nlp)
       @test stats.status == :first_order
@@ -78,7 +78,7 @@ function test_stats()
       @test eltype(stats.multipliers_L) == T
       @test eltype(stats.multipliers_U) == T
 
-      nlp = ADNLPModel(x -> dot(x, x), ones(T, 2), x -> [sum(x) - 1], [0.0], [0.0])
+      nlp = ADNLPModel(x -> dot(x, x), ones(T, 2), x -> [sum(x) - 1], T[0], T[0])
 
       with_logger(NullLogger()) do
         stats = dummy_solver(nlp)
