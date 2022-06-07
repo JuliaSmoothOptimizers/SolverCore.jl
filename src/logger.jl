@@ -5,6 +5,7 @@ const formats = Dict{DataType, String}(
   AbstractFloat => "%8.1e",
   AbstractString => "%15s",
   Symbol => "%15s",
+  Char => "%c",
   Missing => "%15s",
 )
 
