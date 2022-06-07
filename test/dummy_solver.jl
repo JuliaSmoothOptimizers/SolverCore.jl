@@ -26,7 +26,7 @@ function dummy_solver(
   ϵp = atol
 
   fx = obj(nlp, x)
-  @info log_header([:iter, :f, :c, :dual, :t, :char], [Int, T, T, T, Float64, Char])
+  @info log_header([:iter, :f, :c, :dual, :t, :x], [Int, T, T, T, Float64, Char])
   @info log_row(Any[iter, fx, norm(cx), norm(dual), elapsed_time, 'c'])
   solved = norm(dual) < ϵd && norm(cx) < ϵp
   tired = neval_obj(nlp) + neval_cons(nlp) > max_eval || elapsed_time > max_time
