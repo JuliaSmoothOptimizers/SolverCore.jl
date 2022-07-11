@@ -40,13 +40,13 @@ abstract type AbstractExecutionStats end
 A GenericExecutionStats is a struct for storing output information of solvers.
 It contains the following fields:
 - `status`: Indicates the output of the solver. Use `show_statuses()` for the full list;
-- `solution`: The final approximation returned by the solver (default: `[]`);
+- `solution`: The final approximation returned by the solver (default: an uninitialzed vector like `nlp.meta.x0`);
 - `objective`: The objective value at `solution` (default: `Inf`);
 - `dual_feas`: The dual feasibility norm at `solution` (default: `Inf`);
 - `primal_feas`: The primal feasibility norm at `solution` (default: `0.0` if uncontrained, `Inf` otherwise);
-- `multipliers`: The Lagrange multiplers wrt to the constraints (default: `[]`);
-- `multipliers_L`: The Lagrange multiplers wrt to the lower bounds on the variables (default: `[]`);
-- `multipliers_U`: The Lagrange multiplers wrt to the upper bounds on the variables (default: `[]`);
+- `multipliers`: The Lagrange multiplers wrt to the constraints (default: an uninitialzed vector like `nlp.meta.y0`);
+- `multipliers_L`: The Lagrange multiplers wrt to the lower bounds on the variables (default: an uninitialzed vector like `nlp.meta.x0` if there are bounds, or a zero-length vector if not);
+- `multipliers_U`: The Lagrange multiplers wrt to the upper bounds on the variables (default: an uninitialzed vector like `nlp.meta.x0` if there are bounds, or a zero-length vector if not);
 - `iter`: The number of iterations computed by the solver (default: `-1`);
 - `elapsed_time`: The elapsed time computed by the solver (default: `Inf`);
 - `counters::NLPModels.NLSCounters`: The Internal structure storing the number of functions evaluations;
@@ -57,15 +57,15 @@ All other variables can be input as keyword arguments.
 
 Notice that `GenericExecutionStats` does not compute anything, it simply stores.
 """
-mutable struct GenericExecutionStats{T, V} <: AbstractExecutionStats
+mutable struct GenericExecutionStats{T, S, V} <: AbstractExecutionStats
   status::Symbol
-  solution::V # x
+  solution::S # x
   objective::T # f(x)
   dual_feas::T # ‖∇f(x)‖₂ for unc, ‖P[x - ∇f(x)] - x‖₂ for bnd, etc.
   primal_feas::T # ‖c(x)‖ for equalities
-  multipliers # y
-  multipliers_L # zL
-  multipliers_U # zU
+  multipliers::S # y
+  multipliers_L::V # zL
+  multipliers_U::V # zU
   iter::Int
   counters::NLPModels.NLSCounters
   elapsed_time::Real
@@ -75,26 +75,17 @@ end
 function GenericExecutionStats(
   status::Symbol,
   nlp::AbstractNLPModel{T, S};
-  solution::V = T[],
-  kwargs...,
-) where {S, T, V}
-  return GenericExecutionStats{T, V}(status, nlp; solution = solution, kwargs...)
-end
-
-function GenericExecutionStats{T, V}(
-  status::Symbol,
-  nlp::AbstractNLPModel;
-  solution::V = T[],
+  solution::S = similar(nlp.meta.x0),
   objective::T = T(Inf),
   dual_feas::T = T(Inf),
   primal_feas::T = unconstrained(nlp) || bound_constrained(nlp) ? zero(T) : T(Inf),
-  multipliers::AbstractArray = V(undef, 0),
-  multipliers_L::AbstractArray = V(undef, 0),
-  multipliers_U::AbstractArray = V(undef, 0),
+  multipliers::S = similar(nlp.meta.y0),
+  multipliers_L::V = similar(nlp.meta.y0, bound_constrained(nlp) ? nlp.meta.nvar : 0),
+  multipliers_U::V = similar(nlp.meta.y0, bound_constrained(nlp) ? nlp.meta.nvar : 0),
   iter::Int = -1,
   elapsed_time::Real = Inf,
   solver_specific::Dict{Symbol, Tsp} = Dict{Symbol, Any}(),
-) where {T, V, Tsp}
+) where {T, S, V, Tsp}
   if !(status in keys(STATUSES))
     @error "status $status is not a valid status. Use one of the following: " join(
       keys(STATUSES),
@@ -112,7 +103,7 @@ function GenericExecutionStats{T, V}(
       setfield!(c, counter, eval(Meta.parse("$counter"))(nlp))
     end
   end
-  return GenericExecutionStats{T, V}(
+  return GenericExecutionStats{T, S, V}(
     status,
     solution,
     objective,
