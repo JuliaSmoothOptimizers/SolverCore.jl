@@ -92,6 +92,39 @@ function test_stats()
       @test eltype(stats.multipliers_U) == T
     end
   end
+
+  @testset "Test stats setters" begin
+    T = Float64
+    nlp = ADNLPModel(x -> dot(x, x), ones(T, 2), x -> [sum(x) - 1], T[0], T[0])
+    stats = GenericExecutionStats(:first_order, nlp)
+    fields =
+      ("solution", "objective", "residuals", "multipliers", "iter", "time", "solver_specific")
+    for f ∈ fields
+      val = getfield(stats, Symbol("$(f)_reliable"))
+      @test val == false
+    end
+    n = 2
+    x = ones(T, n) / n
+    set_solution!(stats, x)
+    @test stats.solution_reliable
+    set_objective!(stats, obj(nlp, x))
+    @test stats.objective_reliable
+    set_residuals!(stats, 1.0e-3, 1.0e-4)
+    @test stats.residuals_reliable
+    set_multipliers!(stats, [2 / n], T[], T[])
+    @test stats.multipliers_reliable
+    set_iter!(stats, 2)
+    @test stats.iter_reliable
+    set_time!(stats, 0.1)
+    @test stats.time_reliable
+    set_solver_specific!(stats, :bla, "boo!")
+    @test stats.solver_specific_reliable
+    reset!(stats)
+    for f ∈ fields
+      val = getfield(stats, Symbol("$(f)_reliable"))
+      @test val == false
+    end
+  end
 end
 
 test_stats()

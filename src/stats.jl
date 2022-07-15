@@ -1,5 +1,17 @@
 export AbstractExecutionStats,
-  GenericExecutionStats, statsgetfield, statshead, statsline, getStatus, show_statuses
+  GenericExecutionStats,
+  set_solution!,
+  set_objective!,
+  set_residuals!,
+  set_multipliers!,
+  set_iter!,
+  set_time!,
+  set_solver_specific!,
+  statsgetfield,
+  statshead,
+  statsline,
+  getStatus,
+  show_statuses
 
 const STATUSES = Dict(
   :exception => "unhandled exception",
@@ -52,6 +64,22 @@ It contains the following fields:
 - `counters::NLPModels.NLSCounters`: The Internal structure storing the number of functions evaluations;
 - `solver_specific::Dict{Symbol,Any}`: A solver specific dictionary.
 
+The constructor tries to preallocate storage for the fields above.
+The following fields indicate whether the information above has been updated and is reliable:
+
+- `solution_reliable`
+- `objective_reliable`
+- `residuals_reliable` (for `dual_feas` and `primal_feas`)
+- `multipliers_reliable` (for `multiplers`, `multipliers_L` and `multipliers_U`)
+- `iter_reliable`
+- `time_reliable`
+- `solver_specific_reliable`.
+
+Setting fields using one of the methods `set_solution!()`, `set_objective!()`, etc., also marks
+the field value as reliable.
+
+The `reset!()` method marks all fields as unreliable.
+
 The `counters` variable is a copy of `nlp`'s counters, and `status` is mandatory on construction.
 All other variables can be input as keyword arguments.
 
@@ -59,16 +87,23 @@ Notice that `GenericExecutionStats` does not compute anything, it simply stores.
 """
 mutable struct GenericExecutionStats{T, S, V} <: AbstractExecutionStats
   status::Symbol
+  solution_reliable::Bool
   solution::S # x
+  objective_reliable::Bool
   objective::T # f(x)
+  residuals_reliable::Bool
   dual_feas::T # ‖∇f(x)‖₂ for unc, ‖P[x - ∇f(x)] - x‖₂ for bnd, etc.
   primal_feas::T # ‖c(x)‖ for equalities
+  multipliers_reliable::Bool
   multipliers::S # y
   multipliers_L::V # zL
   multipliers_U::V # zU
+  iter_reliable::Bool
   iter::Int
   counters::NLPModels.NLSCounters
-  elapsed_time::Real
+  time_reliable::Bool
+  elapsed_time::Float64
+  solver_specific_reliable::Bool
   solver_specific::Dict{Symbol, Any}
 end
 
@@ -105,18 +140,134 @@ function GenericExecutionStats(
   end
   return GenericExecutionStats{T, S, V}(
     status,
+    false,
     solution,
+    false,
     objective,
+    false,
     dual_feas,
     primal_feas,
+    false,
     multipliers,
     multipliers_L,
     multipliers_U,
+    false,
     iter,
     c,
+    false,
     elapsed_time,
+    false,
     solver_specific,
   )
+end
+
+"""
+    reset!(stats::GenericExecutionStats)
+
+Reset the internal flags of `stats` to `false` to Indicate
+that the contents should not be trusted.
+"""
+function NLPModels.reset!(stats::GenericExecutionStats)
+  stats.solution_reliable = false
+  stats.objective_reliable = false
+  stats.residuals_reliable = false
+  stats.multipliers_reliable = false
+  stats.iter_reliable = false
+  stats.time_reliable = false
+  stats.solver_specific_reliable = false
+  stats
+end
+
+"""
+    set_solution!(stats::GenericExecutionStats, x::AbstractVector)
+
+Register `x` as optimal solution in `stats` and mark it as reliable.
+"""
+function set_solution!(stats::GenericExecutionStats, x::AbstractVector)
+  stats.solution .= x
+  stats.solution_reliable = true
+  stats
+end
+
+"""
+    set_objective!(stats::GenericExecutionStats{T, S, V}, val::T)
+
+Register `val` as optimal objective value in `stats` and mark it as reliable.
+"""
+function set_objective!(stats::GenericExecutionStats{T, S, V}, val::T) where {T, S, V}
+  stats.objective = val
+  stats.objective_reliable = true
+  stats
+end
+
+"""
+    set_residuals!(stats::GenericExecutionStats{T, S, V}, primal::T, dual::T)
+
+Register `primal` and `dual` as optimal primal and dual feasibility residuals,
+respectively, in `stats` and mark them as reliable.
+"""
+function set_residuals!(stats::GenericExecutionStats{T, S, V}, primal::T, dual::T) where {T, S, V}
+  stats.primal_feas = primal
+  stats.dual_feas = dual
+  stats.residuals_reliable = true
+  stats
+end
+
+"""
+    set_multipliers!(stats::GenericExecutionStats{T, S, V}, y::S, zL::V, zU::V)
+
+Register `y`, `zL` and `zU` as optimal multipliers associated to equality constraints,
+lower-bounded and upper-bounded constraints, respectively, in `stats` and mark them as reliable.
+"""
+function set_multipliers!(stats::GenericExecutionStats{T, S, V}, y::S, zL::V, zU::V) where {T, S, V}
+  stats.multipliers .= y
+  stats.multipliers_L .= zL
+  stats.multipliers_U .= zU
+  stats.multipliers_reliable = true
+  stats
+end
+
+"""
+    set_iter!(stats::GenericExecutionStats, iter::Int)
+
+Register `iter` as optimal iteration number in `stats` and mark it as reliable.
+"""
+function set_iter!(stats::GenericExecutionStats, iter::Int)
+  stats.iter = iter
+  stats.iter_reliable = true
+  stats
+end
+
+"""
+    set_time!(stats::GenericExecutionStats, time::Float64)
+
+Register `time` as optimal solution time in `stats` and mark it as reliable.
+"""
+function set_time!(stats::GenericExecutionStats, time::Float64)
+  stats.elapsed_time = time
+  stats.time_reliable = true
+  stats
+end
+
+"""
+    set_solver_specific!(stats::GenericExecutionStats, field::Symbol, value)
+
+Register `value` as a solver-specific value identified by `field` in `stats`
+and mark it as reliable.
+"""
+function set_solver_specific!(stats::GenericExecutionStats, field::Symbol, value)
+  if field ∈ keys(stats.solver_specific)
+    try
+      # will fail if typeof(solver_specific[field]) does not support broadcast
+      stats.solver_specific[field] .= value
+    catch
+      stats.solver_specific[field] = value
+    end
+  else
+    stats.solver_specific[field] = value
+  end
+  stats.solver_specific_reliable = true
+  stats
 end
 
 import Base.show, Base.print, Base.println
