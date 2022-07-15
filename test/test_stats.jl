@@ -30,7 +30,7 @@ function test_stats()
     println(f, stats, showvec = (io, x) -> print(io, x))
   end
 
-  line = [:status, :neval_obj, :objective, :iter]
+  line = [:status, :objective, :iter]
   for field in line
     value = statsgetfield(stats, field)
     println("$field -> $value")
