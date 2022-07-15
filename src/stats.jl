@@ -61,7 +61,6 @@ It contains the following fields:
 - `multipliers_U`: The Lagrange multiplers wrt to the upper bounds on the variables (default: an uninitialzed vector like `nlp.meta.x0` if there are bounds, or a zero-length vector if not);
 - `iter`: The number of iterations computed by the solver (default: `-1`);
 - `elapsed_time`: The elapsed time computed by the solver (default: `Inf`);
-- `counters::NLPModels.NLSCounters`: The Internal structure storing the number of functions evaluations;
 - `solver_specific::Dict{Symbol,Any}`: A solver specific dictionary.
 
 The constructor tries to preallocate storage for the fields above.
@@ -80,7 +79,7 @@ the field value as reliable.
 
 The `reset!()` method marks all fields as unreliable.
 
-The `counters` variable is a copy of `nlp`'s counters, and `status` is mandatory on construction.
+The `status` field is mandatory on construction.
 All other variables can be input as keyword arguments.
 
 Notice that `GenericExecutionStats` does not compute anything, it simply stores.
@@ -100,7 +99,6 @@ mutable struct GenericExecutionStats{T, S, V} <: AbstractExecutionStats
   multipliers_U::V # zU
   iter_reliable::Bool
   iter::Int
-  counters::NLPModels.NLSCounters
   time_reliable::Bool
   elapsed_time::Float64
   solver_specific_reliable::Bool
@@ -128,16 +126,6 @@ function GenericExecutionStats(
     )
     throw(KeyError(status))
   end
-  c = NLSCounters()
-  for counter in fieldnames(Counters)
-    setfield!(c.counters, counter, eval(Meta.parse("$counter"))(nlp))
-  end
-  if nlp isa AbstractNLSModel
-    for counter in fieldnames(NLSCounters)
-      counter == :counters && continue
-      setfield!(c, counter, eval(Meta.parse("$counter"))(nlp))
-    end
-  end
   return GenericExecutionStats{T, S, V}(
     status,
     false,
@@ -153,7 +141,6 @@ function GenericExecutionStats(
     multipliers_U,
     false,
     iter,
-    c,
     false,
     elapsed_time,
     false,
@@ -350,14 +337,6 @@ function statsgetfield(stats::AbstractExecutionStats, name::Symbol)
   if name == :status
     v = getStatus(stats)
     t = String
-  elseif name in fieldnames(NLPModels.NLSCounters)
-    v = getfield(stats.counters, name)
-  elseif name in fieldnames(NLPModels.Counters)
-    if stats.counters isa NLPModels.Counters
-      v = getfield(stats.counters, name)
-    else
-      v = getfield(stats.counters.counters, name)
-    end
   elseif name in fieldnames(typeof(stats))
     v = getfield(stats, name)
     t = fieldtype(typeof(stats), name)
