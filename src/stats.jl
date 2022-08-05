@@ -63,7 +63,10 @@ It contains the following fields:
 - `elapsed_time`: The elapsed time computed by the solver (default: `Inf`);
 - `solver_specific::Dict{Symbol,Any}`: A solver specific dictionary.
 
-The constructor tries to preallocate storage for the fields above.
+The constructor preallocates storage for the fields above.
+Special storage may be used for `multipliers_L` and `multipliers_U` by passing them to the constructor.
+For instance, if a problem has few bound constraints, those multipliers could be held in sparse vectors.
+
 The following fields indicate whether the information above has been updated and is reliable:
 
 - `solution_reliable`
@@ -84,7 +87,7 @@ All other variables can be input as keyword arguments.
 
 Notice that `GenericExecutionStats` does not compute anything, it simply stores.
 """
-mutable struct GenericExecutionStats{T, S, V} <: AbstractExecutionStats
+mutable struct GenericExecutionStats{T, S, V, Tsp} <: AbstractExecutionStats
   status::Symbol
   solution_reliable::Bool
   solution::S # x
@@ -102,7 +105,7 @@ mutable struct GenericExecutionStats{T, S, V} <: AbstractExecutionStats
   time_reliable::Bool
   elapsed_time::Float64
   solver_specific_reliable::Bool
-  solver_specific::Dict{Symbol, Any}
+  solver_specific::Dict{Symbol, Tsp}
 end
 
 function GenericExecutionStats(
@@ -111,10 +114,10 @@ function GenericExecutionStats(
   solution::S = similar(nlp.meta.x0),
   objective::T = T(Inf),
   dual_feas::T = T(Inf),
-  primal_feas::T = unconstrained(nlp) || bound_constrained(nlp) ? zero(T) : T(Inf),
+  primal_feas::T = unconstrained(nlp) ? zero(T) : T(Inf),
   multipliers::S = similar(nlp.meta.y0),
-  multipliers_L::V = similar(nlp.meta.y0, bound_constrained(nlp) ? nlp.meta.nvar : 0),
-  multipliers_U::V = similar(nlp.meta.y0, bound_constrained(nlp) ? nlp.meta.nvar : 0),
+  multipliers_L::V = similar(nlp.meta.y0, has_bounds(nlp) ? nlp.meta.nvar : 0),
+  multipliers_U::V = similar(nlp.meta.y0, has_bounds(nlp) ? nlp.meta.nvar : 0),
   iter::Int = -1,
   elapsed_time::Real = Inf,
   solver_specific::Dict{Symbol, Tsp} = Dict{Symbol, Any}(),
@@ -126,7 +129,7 @@ function GenericExecutionStats(
     )
     throw(KeyError(status))
   end
-  return GenericExecutionStats{T, S, V}(
+  return GenericExecutionStats{T, S, V, Tsp}(
     status,
     false,
     solution,

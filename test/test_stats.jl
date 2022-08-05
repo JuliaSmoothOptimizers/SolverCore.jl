@@ -1,22 +1,16 @@
 function test_stats()
   show_statuses()
   nlp = ADNLPModel(x -> dot(x, x), zeros(2))
-  stats = GenericExecutionStats(
-    :first_order,
-    nlp,
-    objective = 1.0,
-    dual_feas = 1e-12,
-    solution = ones(100),
-    iter = 10,
-    solver_specific = Dict(
-      :matvec => 10,
-      :dot => 25,
-      :empty_vec => [],
-      :small_vec => [2.0; 3.0],
-      :axpy => 20,
-      :ray => -1 ./ (1:100),
-    ),
-  )
+  stats = GenericExecutionStats(:first_order, nlp)
+  set_objective!(stats, 1.0)
+  set_residuals!(stats, 0.0, 1e-12)
+  set_solution!(stats, ones(2))
+  set_iter!(stats, 10)
+  set_solver_specific!(stats, :matvec, 10)
+  set_solver_specific!(stats, :dot, 25)
+  set_solver_specific!(stats, :empty_vec, [])
+  set_solver_specific!(stats, :axpy, 20)
+  set_solver_specific!(stats, :ray, -1 ./ (1:100))
 
   show(stats)
   print(stats)

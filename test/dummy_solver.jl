@@ -61,17 +61,13 @@ function dummy_solver(
     :max_eval
   end
 
-  return GenericExecutionStats(
-    :unknown,
-    nlp,
-    objective = fx,
-    dual_feas = norm(dual),
-    primal_feas = norm(cx),
-    multipliers = y,
-    multipliers_L = zeros(T, nvar),
-    multipliers_U = zeros(T, nvar),
-    elapsed_time = elapsed_time,
-    solution = x,
-    iter = iter,
-  )
+  stats = GenericExecutionStats(status, nlp)
+  set_objective!(stats, fx)
+  set_residuals!(stats, norm(cx), norm(dual))
+  z = has_bounds(nlp) ? zeros(T, nvar) : zeros(T, 0)
+  set_multipliers!(stats, y, z, z)
+  set_time!(stats, elapsed_time)
+  set_solution!(stats, x)
+  set_iter!(stats, iter)
+  return stats
 end
