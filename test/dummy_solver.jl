@@ -61,7 +61,8 @@ function dummy_solver(
     :max_eval
   end
 
-  stats = GenericExecutionStats(status, nlp)
+  stats = GenericExecutionStats(nlp)
+  set_status!(stats, status)
   set_objective!(stats, fx)
   set_residuals!(stats, norm(cx), norm(dual))
   z = has_bounds(nlp) ? zeros(T, nvar) : zeros(T, 0)
