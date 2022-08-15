@@ -14,7 +14,7 @@ function dummy_solver(
 
   cx = ncon > 0 ? cons(nlp, x) : zeros(T, 0)
   gx = grad(nlp, x)
-  Jx = ncon > 0 ? jac(nlp, x) : zeros(T, 0, nvar)
+  Jx = ncon > 0 ? Matrix(jac(nlp, x)) : zeros(T, 0, nvar)
   y = -Jx' \ gx
   Hxy = ncon > 0 ? hess(nlp, x, y) : hess(nlp, x)
 
@@ -42,7 +42,7 @@ function dummy_solver(
 
     cx = ncon > 0 ? cons(nlp, x) : zeros(T, 0)
     gx = grad(nlp, x)
-    Jx = ncon > 0 ? jac(nlp, x) : zeros(T, 0, nvar)
+    Jx = ncon > 0 ? Matrix(jac(nlp, x)) : zeros(T, 0, nvar)
     dual = gx + Jx' * y
     elapsed_time = time() - start_time
     solved = norm(dual) < ϵd && norm(cx) < ϵp
