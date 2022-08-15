@@ -1,5 +1,6 @@
 export AbstractExecutionStats,
   GenericExecutionStats,
+  set_status!,
   set_solution!,
   set_objective!,
   set_residuals!,
@@ -30,6 +31,16 @@ const STATUSES = Dict(
   :unknown => "unknown",
   :user => "user-requested stop",
 )
+
+function check_status(status::Symbol)
+  if !(status in keys(STATUSES))
+    @error "status $status is not a valid status. Use one of the following: " join(
+      keys(STATUSES),
+      ", ",
+    )
+    throw(KeyError(status))
+  end
+end
 
 """
     show_statuses()
@@ -88,6 +99,7 @@ All other variables can be input as keyword arguments.
 Notice that `GenericExecutionStats` does not compute anything, it simply stores.
 """
 mutable struct GenericExecutionStats{T, S, V, Tsp} <: AbstractExecutionStats
+  status_reliable::Bool
   status::Symbol
   solution_reliable::Bool
   solution::S # x
@@ -109,8 +121,8 @@ mutable struct GenericExecutionStats{T, S, V, Tsp} <: AbstractExecutionStats
 end
 
 function GenericExecutionStats(
-  status::Symbol,
   nlp::AbstractNLPModel{T, S};
+  status::Symbol = :unknown,
   solution::S = similar(nlp.meta.x0),
   objective::T = T(Inf),
   dual_feas::T = T(Inf),
@@ -122,14 +134,9 @@ function GenericExecutionStats(
   elapsed_time::Real = Inf,
   solver_specific::Dict{Symbol, Tsp} = Dict{Symbol, Any}(),
 ) where {T, S, V, Tsp}
-  if !(status in keys(STATUSES))
-    @error "status $status is not a valid status. Use one of the following: " join(
-      keys(STATUSES),
-      ", ",
-    )
-    throw(KeyError(status))
-  end
+  check_status(status)
   return GenericExecutionStats{T, S, V, Tsp}(
+    false,
     status,
     false,
     solution,
@@ -158,6 +165,7 @@ Reset the internal flags of `stats` to `false` to Indicate
 that the contents should not be trusted.
 """
 function NLPModels.reset!(stats::GenericExecutionStats)
+  stats.status_reliable = false
   stats.solution_reliable = false
   stats.objective_reliable = false
   stats.residuals_reliable = false
@@ -165,6 +173,18 @@ function NLPModels.reset!(stats::GenericExecutionStats)
   stats.iter_reliable = false
   stats.time_reliable = false
   stats.solver_specific_reliable = false
+  stats
+end
+
+"""
+    set_status!(stats::GenericExecutionStats, status::Symbol)
+
+Register `status` as final status in `stats` and mark it as reliable.
+"""
+function set_status!(stats::GenericExecutionStats, status::Symbol)
+  check_status(status)
+  stats.status = status
+  stats.status_reliable = true
   stats
 end
 

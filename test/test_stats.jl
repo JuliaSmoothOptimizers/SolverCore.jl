@@ -1,7 +1,8 @@
 function test_stats()
   show_statuses()
   nlp = ADNLPModel(x -> dot(x, x), zeros(2))
-  stats = GenericExecutionStats(:first_order, nlp)
+  stats = GenericExecutionStats(nlp)
+  set_status!(stats, :first_order)
   set_objective!(stats, 1.0)
   set_residuals!(stats, 0.0, 1e-12)
   set_solution!(stats, ones(2))
@@ -36,16 +37,20 @@ function test_stats()
     for T in (Float16, Float32, Float64, BigFloat)
       nlp = ADNLPModel(x -> dot(x, x), ones(T, 2))
 
-      stats = GenericExecutionStats(:first_order, nlp)
+      stats = GenericExecutionStats(nlp)
+      set_status!(stats, :first_order)
       @test stats.status == :first_order
+      @test stats.status_reliable
       @test typeof(stats.objective) == T
       @test typeof(stats.dual_feas) == T
       @test typeof(stats.primal_feas) == T
 
       nlp = ADNLPModel(x -> dot(x, x), ones(T, 2), x -> [sum(x) - 1], T[0], T[0])
 
-      stats = GenericExecutionStats(:first_order, nlp)
+      stats = GenericExecutionStats(nlp)
+      set_status!(stats, :first_order)
       @test stats.status == :first_order
+      @test stats.status_reliable
       @test typeof(stats.objective) == T
       @test typeof(stats.dual_feas) == T
       @test typeof(stats.primal_feas) == T
@@ -53,7 +58,8 @@ function test_stats()
   end
 
   @testset "Test throws" begin
-    @test_throws Exception GenericExecutionStats(:bad, nlp)
+    stats = GenericExecutionStats(nlp)
+    @test_throws Exception set_status!(stats, :bad)
     @test_throws Exception GenericExecutionStats(:unkwown, nlp, bad = true)
   end
 
@@ -90,15 +96,25 @@ function test_stats()
   @testset "Test stats setters" begin
     T = Float64
     nlp = ADNLPModel(x -> dot(x, x), ones(T, 2), x -> [sum(x) - 1], T[0], T[0])
-    stats = GenericExecutionStats(:first_order, nlp)
-    fields =
-      ("solution", "objective", "residuals", "multipliers", "iter", "time", "solver_specific")
+    stats = GenericExecutionStats(nlp)
+    fields = (
+      "status",
+      "solution",
+      "objective",
+      "residuals",
+      "multipliers",
+      "iter",
+      "time",
+      "solver_specific",
+    )
     for f ∈ fields
       val = getfield(stats, Symbol("$(f)_reliable"))
       @test val == false
     end
     n = 2
     x = ones(T, n) / n
+    set_status!(stats, :first_order)
+    @test stats.status_reliable
     set_solution!(stats, x)
     @test stats.solution_reliable
     set_objective!(stats, obj(nlp, x))
