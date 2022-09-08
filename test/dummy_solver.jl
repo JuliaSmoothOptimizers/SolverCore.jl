@@ -86,6 +86,7 @@ function SolverCore.solve!(
   end
 
   iter = 0
+  set_iter!(stats, iter)
   ϵd = atol + rtol * norm(dual)
   ϵp = atol
 
@@ -94,8 +95,9 @@ function SolverCore.solve!(
   verbose && @info log_row(Any[iter, fx, norm(cx), norm(dual), elapsed_time, 'c'])
   solved = norm(dual) < ϵd && norm(cx) < ϵp
   tired = neval_obj(nlp) + neval_cons(nlp) > max_eval || elapsed_time > max_time
+  user = false
 
-  while !(solved || tired)
+  while !(solved || tired || user)
     # assume the model returns a dense Hessian in column-major order
     # NB: hess_coord!() only returns values in the lower triangle
     hess_coord!(nlp, x, y, view(hval, 1:nnzh))
@@ -122,6 +124,9 @@ function SolverCore.solve!(
     Wxy = reshape_array(wval, (nvar + ncon, nvar + ncon))
     Hxy = reshape_array(hval, (nvar, nvar))
     Wxy[1:nvar, 1:nvar] .= Hxy
+    for i = 1:nvar
+      Wxy[i, i] += sqrt(eps(T))
+    end
     if ncon > 0
       Wxy[(nvar + 1):(nvar + ncon), 1:nvar] .= Jx
     end
@@ -146,11 +151,21 @@ function SolverCore.solve!(
       mul!(dual, Jx', y, one(T), one(T))
     end
     elapsed_time = time() - start_time
-    solved = norm(dual) < ϵd && norm(cx) < ϵp
+    set_time!(stats, elapsed_time)
+    presid = norm(cx)
+    dresid = norm(dual)
+    set_residuals!(stats, presid, dresid)
+    solved = dresid < ϵd && presid < ϵp
     tired = neval_obj(nlp) + neval_cons(nlp) > max_eval || elapsed_time > max_time
 
     iter += 1
     fx = obj(nlp, x)
+    set_iter!(stats, iter)
+    set_objective!(stats, fx)
+
+    callback(nlp, solver, stats)
+    user = stats.status == :user
+
     verbose && @info log_row(Any[iter, fx, norm(cx), norm(dual), elapsed_time, 'd'])
   end
 

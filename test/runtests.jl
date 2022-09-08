@@ -11,3 +11,4 @@ include("dummy_solver.jl")
 
 include("test_logging.jl")
 include("test_stats.jl")
+include("test_callback.jl")
