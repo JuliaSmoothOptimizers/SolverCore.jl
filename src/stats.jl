@@ -226,13 +226,34 @@ end
 """
     set_multipliers!(stats::GenericExecutionStats{T, S, V}, y::S, zL::V, zU::V)
 
-Register `y`, `zL` and `zU` as optimal multipliers associated to equality constraints,
+Register `y`, `zL` and `zU` as optimal multipliers associated to general constraints,
 lower-bounded and upper-bounded constraints, respectively, in `stats` and mark them as reliable.
 """
 function set_multipliers!(stats::GenericExecutionStats{T, S, V}, y::S, zL::V, zU::V) where {T, S, V}
-  stats.multipliers .= y
+  set_bounds_multipliers!(stats, zL, zU)
+  set_constraint_multipliers!(stats, y)
+  stats
+end
+
+"""
+    set_bounds_multipliers!(stats::GenericExecutionStats{T, S, V}, zL::V, zU::V)
+
+Register `zL` and `zU` as optimal multipliers associated to lower-bounded and upper-bounded constraints, respectively, in `stats` and mark them as reliable.
+"""
+function set_bounds_multipliers!(stats::GenericExecutionStats{T, S, V}, zL::V, zU::V) where {T, S, V}
   stats.multipliers_L .= zL
   stats.multipliers_U .= zU
+  stats.multipliers_reliable = true
+  stats
+end
+
+"""
+    set_constraint_multipliers!(stats::GenericExecutionStats{T, S, V}, y::S, zL::V, zU::V)
+
+Register `y` as optimal multipliers associated to general constraints in `stats` and mark them as reliable.
+"""
+function set_constraint_multipliers!(stats::GenericExecutionStats{T, S, V}, y::S) where {T, S, V}
+  stats.multipliers .= y
   stats.multipliers_reliable = true
   stats
 end
