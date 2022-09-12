@@ -104,8 +104,10 @@ function test_stats()
       "status",
       "solution",
       "objective",
-      "residuals",
+      "primal_residuals",
+      "dual_residuals",
       "multipliers",
+      "bounds_multipliers",
       "iter",
       "time",
       "solver_specific",
@@ -123,9 +125,11 @@ function test_stats()
     set_objective!(stats, obj(nlp, x))
     @test stats.objective_reliable
     set_residuals!(stats, 1.0e-3, 1.0e-4)
-    @test stats.residuals_reliable
+    @test stats.primal_residuals_reliable
+    @test stats.dual_residuals_reliable
     set_multipliers!(stats, [2 / n], T[], T[])
     @test stats.multipliers_reliable
+    @test stats.bounds_multipliers_reliable
     set_iter!(stats, 2)
     @test stats.iter_reliable
     set_time!(stats, 0.1)
