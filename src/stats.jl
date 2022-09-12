@@ -83,7 +83,8 @@ The following fields indicate whether the information above has been updated and
 - `solution_reliable`
 - `objective_reliable`
 - `residuals_reliable` (for `dual_feas` and `primal_feas`)
-- `multipliers_reliable` (for `multiplers`, `multipliers_L` and `multipliers_U`)
+- `multipliers_reliable` (for `multiplers`)
+- `bounds_multipliers_reliable` (for `multipliers_L` and `multipliers_U`)
 - `iter_reliable`
 - `time_reliable`
 - `solver_specific_reliable`.
@@ -110,6 +111,7 @@ mutable struct GenericExecutionStats{T, S, V, Tsp} <: AbstractExecutionStats
   primal_feas::T # ‖c(x)‖ for equalities
   multipliers_reliable::Bool
   multipliers::S # y
+  bounds_multipliers_reliable::Bool
   multipliers_L::V # zL
   multipliers_U::V # zU
   iter_reliable::Bool
@@ -147,6 +149,7 @@ function GenericExecutionStats(
     primal_feas,
     false,
     multipliers,
+    false,
     multipliers_L,
     multipliers_U,
     false,
@@ -170,6 +173,7 @@ function NLPModels.reset!(stats::GenericExecutionStats)
   stats.objective_reliable = false
   stats.residuals_reliable = false
   stats.multipliers_reliable = false
+  stats.bounds_multipliers_reliable = false
   stats.iter_reliable = false
   stats.time_reliable = false
   stats.solver_specific_reliable = false
@@ -243,7 +247,7 @@ Register `zL` and `zU` as optimal multipliers associated to lower-bounded and up
 function set_bounds_multipliers!(stats::GenericExecutionStats{T, S, V}, zL::V, zU::V) where {T, S, V}
   stats.multipliers_L .= zL
   stats.multipliers_U .= zU
-  stats.multipliers_reliable = true
+  stats.bounds_multipliers_reliable = true
   stats
 end
 
