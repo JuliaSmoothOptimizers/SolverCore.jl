@@ -4,8 +4,8 @@ export AbstractExecutionStats,
   set_solution!,
   set_objective!,
   set_residuals!,
-  set_primal_residuals!,
-  set_dual_residuals!,
+  set_primal_residual!,
+  set_dual_residual!,
   set_multipliers!,
   set_bounds_multipliers!,
   set_iter!,
@@ -109,9 +109,9 @@ mutable struct GenericExecutionStats{T, S, V, Tsp} <: AbstractExecutionStats
   solution::S # x
   objective_reliable::Bool
   objective::T # f(x)
-  dual_residuals_reliable::Bool
+  dual_residual_reliable::Bool
   dual_feas::T # ‖∇f(x)‖₂ for unc, ‖P[x - ∇f(x)] - x‖₂ for bnd, etc.
-  primal_residuals_reliable::Bool
+  primal_residual_reliable::Bool
   primal_feas::T # ‖c(x)‖ for equalities
   multipliers_reliable::Bool
   multipliers::S # y
@@ -176,8 +176,8 @@ function NLPModels.reset!(stats::GenericExecutionStats)
   stats.status_reliable = false
   stats.solution_reliable = false
   stats.objective_reliable = false
-  stats.primal_residuals_reliable = false
-  stats.dual_residuals_reliable = false
+  stats.primal_residual_reliable = false
+  stats.dual_residual_reliable = false
   stats.multipliers_reliable = false
   stats.bounds_multipliers_reliable = false
   stats.iter_reliable = false
@@ -227,30 +227,30 @@ Register `primal` and `dual` as optimal primal and dual feasibility residuals,
 respectively, in `stats` and mark them as reliable.
 """
 function set_residuals!(stats::GenericExecutionStats{T, S, V}, primal::T, dual::T) where {T, S, V}
-  set_primal_residuals!(stats, primal)
-  set_dual_residuals!(stats, dual)
+  set_primal_residual!(stats, primal)
+  set_dual_residual!(stats, dual)
   stats
 end
 
 """
-    set_primal_residuals!(stats::GenericExecutionStats{T, S, V}, primal::T)
+    set_primal_residual!(stats::GenericExecutionStats{T, S, V}, primal::T)
 
 Register `primal` as optimal primal residuals in `stats` and mark it as reliable.
 """
-function set_primal_residuals!(stats::GenericExecutionStats{T, S, V}, primal::T) where {T, S, V}
+function set_primal_residual!(stats::GenericExecutionStats{T, S, V}, primal::T) where {T, S, V}
   stats.primal_feas = primal
-  stats.primal_residuals_reliable = true
+  stats.primal_residual_reliable = true
   stats
 end
 
 """
-    set_dual_residuals!(stats::GenericExecutionStats{T, S, V}, dual::T)
+    set_dual_residual!(stats::GenericExecutionStats{T, S, V}, dual::T)
 
 Register `dual` as optimal dual feasibility residuals in `stats` and mark it as reliable.
 """
-function set_dual_residuals!(stats::GenericExecutionStats{T, S, V}, dual::T) where {T, S, V}
+function set_dual_residual!(stats::GenericExecutionStats{T, S, V}, dual::T) where {T, S, V}
   stats.dual_feas = dual
-  stats.dual_residuals_reliable = true
+  stats.dual_residual_reliable = true
   stats
 end
 
