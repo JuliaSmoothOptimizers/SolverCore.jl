@@ -62,7 +62,7 @@ end
 abstract type AbstractExecutionStats end
 
 """
-    GenericExecutionStats(status, nlp; ...)
+    GenericExecutionStats(nlp; ...)
 
 A GenericExecutionStats is a struct for storing output information of solvers.
 It contains the following fields:
@@ -98,7 +98,7 @@ the field value as reliable.
 
 The `reset!()` method marks all fields as unreliable.
 
-The `status` field is mandatory on construction.
+`nlp` is mandatory to set default optional fields. 
 All other variables can be input as keyword arguments.
 
 Notice that `GenericExecutionStats` does not compute anything, it simply stores.
