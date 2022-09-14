@@ -98,7 +98,7 @@ the field value as reliable.
 
 The `reset!()` method marks all fields as unreliable.
 
-`nlp` is mandatory to build default optionnal fields. 
+`nlp` is mandatory to set default optional fields. 
 All other variables can be input as keyword arguments.
 
 Notice that `GenericExecutionStats` does not compute anything, it simply stores.
