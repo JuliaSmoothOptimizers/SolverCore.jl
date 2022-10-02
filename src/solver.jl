@@ -6,6 +6,15 @@ abstract type AbstractSolver end
 abstract type AbstractOptimizationSolver <: AbstractSolver end
 
 """
+    reset!(solver::AbstractOptimizationSolver, model::AbstractNLPModel)
+
+Use in the context of restarting or reusing the `solver` structure.
+Reset the internal fields of `solver` for the `model` before calling `solve!` on the same structure.
+`model` must have the same number of variables, bounds and constraints as that used to instantiate `solver`.
+"""
+function NLPModels.reset!(::AbstractOptimizationSolver, ::AbstractNLPModel) end
+
+"""
     solve!(solver, model; kwargs...)
     solve!(solver, model, stats; kwargs...)
 
