@@ -6,7 +6,7 @@
   @test stats.status == :first_order
   # Try with a new intial guess
   nlp.meta.x0 .= 0.2
-  reset!(solver, nlp)
+  reset!(solver)
   solve!(solver, nlp, stats, verbose = false)
   @test stats.status == :first_order
   # Try with a new problem of the same size
