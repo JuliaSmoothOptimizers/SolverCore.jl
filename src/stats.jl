@@ -67,13 +67,13 @@ abstract type AbstractExecutionStats end
 A GenericExecutionStats is a struct for storing output information of solvers.
 It contains the following fields:
 - `status`: Indicates the output of the solver. Use `show_statuses()` for the full list;
-- `solution`: The final approximation returned by the solver (default: an uninitialzed vector like `nlp.meta.x0`);
+- `solution`: The final approximation returned by the solver (default: an uninitialized vector like `nlp.meta.x0`);
 - `objective`: The objective value at `solution` (default: `Inf`);
 - `dual_feas`: The dual feasibility norm at `solution` (default: `Inf`);
 - `primal_feas`: The primal feasibility norm at `solution` (default: `0.0` if uncontrained, `Inf` otherwise);
-- `multipliers`: The Lagrange multiplers wrt to the constraints (default: an uninitialzed vector like `nlp.meta.y0`);
-- `multipliers_L`: The Lagrange multiplers wrt to the lower bounds on the variables (default: an uninitialzed vector like `nlp.meta.x0` if there are bounds, or a zero-length vector if not);
-- `multipliers_U`: The Lagrange multiplers wrt to the upper bounds on the variables (default: an uninitialzed vector like `nlp.meta.x0` if there are bounds, or a zero-length vector if not);
+- `multipliers`: The Lagrange multipliers wrt to the constraints (default: an uninitialized vector like `nlp.meta.y0`);
+- `multipliers_L`: The Lagrange multipliers wrt to the lower bounds on the variables (default: an uninitialized vector like `nlp.meta.x0` if there are bounds, or a zero-length vector if not);
+- `multipliers_U`: The Lagrange multipliers wrt to the upper bounds on the variables (default: an uninitialized vector like `nlp.meta.x0` if there are bounds, or a zero-length vector if not);
 - `iter`: The number of iterations computed by the solver (default: `-1`);
 - `elapsed_time`: The elapsed time computed by the solver (default: `Inf`);
 - `solver_specific::Dict{Symbol,Any}`: A solver specific dictionary.
@@ -87,7 +87,7 @@ The following fields indicate whether the information above has been updated and
 - `solution_reliable`
 - `objective_reliable`
 - `residuals_reliable` (for `dual_feas` and `primal_feas`)
-- `multipliers_reliable` (for `multiplers`)
+- `multipliers_reliable` (for `multipliers`)
 - `bounds_multipliers_reliable` (for `multipliers_L` and `multipliers_U`)
 - `iter_reliable`
 - `time_reliable`
