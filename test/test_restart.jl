@@ -1,6 +1,6 @@
 @testset "test restart" begin
   nlp = ADNLPModel(x -> dot(x, x) / 2, ones(2), x -> [sum(x .^ 3) - 1], [0.0], [0.0])
-  solver = DummySolver(nlp)
+  solver = SolverCore.DummySolver(nlp)
   stats = GenericExecutionStats(nlp)
   solve!(solver, nlp, stats, verbose = false)
   @test stats.status == :first_order

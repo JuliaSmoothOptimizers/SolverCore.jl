@@ -12,7 +12,7 @@ function test_logging()
 
   with_logger(ConsoleLogger()) do
     @info "Testing dummy solver with logger"
-    dummy_solver(nlps[1], max_eval = 20)
+    SolverCore.dummy_solver(nlps[1], max_eval = 20)
     reset!.(nlps)
   end
 end
