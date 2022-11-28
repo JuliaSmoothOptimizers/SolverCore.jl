@@ -6,6 +6,6 @@
       set_status!(stats, :user)
     end
   end
-  stats = dummy_solver(nlp, max_eval = 20, callback = callback)
+  stats = SolverCore.dummy_solver(nlp, max_eval = 20, callback = callback)
   @test stats.iter == 3
 end

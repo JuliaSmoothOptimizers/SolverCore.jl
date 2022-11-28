@@ -66,7 +66,7 @@ function test_stats()
   @testset "Testing Dummy Solver with multi-precision" begin
     for T in (Float16, Float32, Float64, BigFloat)
       nlp = ADNLPModel(x -> dot(x, x), ones(T, 2))
-      solver = DummySolver(nlp)
+      solver = SolverCore.DummySolver(nlp)
 
       stats = with_logger(NullLogger()) do
         solve!(solver, nlp)
@@ -80,7 +80,7 @@ function test_stats()
       @test eltype(stats.multipliers_U) == T
 
       nlp = ADNLPModel(x -> dot(x, x), ones(T, 2), x -> [sum(x) - 1], T[0], T[0])
-      solver = DummySolver(nlp)
+      solver = SolverCore.DummySolver(nlp)
       stats = GenericExecutionStats(nlp)
 
       with_logger(NullLogger()) do

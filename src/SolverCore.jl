@@ -1,7 +1,7 @@
 module SolverCore
 
 # stdlib
-using Printf
+using LinearAlgebra, Printf
 
 # our packages
 using NLPModels
@@ -9,5 +9,6 @@ using NLPModels
 include("logger.jl")
 include("stats.jl")
 include("solver.jl")
+include("dummy_solver.jl")
 
 end
