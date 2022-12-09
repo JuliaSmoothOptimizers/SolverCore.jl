@@ -50,6 +50,7 @@ function SolverCore.solve!(
 ) where {T, S <: AbstractVector{T}}
   start_time = time()
   elapsed_time = 0.0
+  set_time!(stats, elapsed_time)
 
   nvar, ncon = nlp.meta.nvar, nlp.meta.ncon
   x = solver.x .= x0
@@ -91,6 +92,7 @@ function SolverCore.solve!(
   ϵp = atol
 
   fx = obj(nlp, x)
+  set_objective!(stats, fx)
   verbose && @info log_header([:iter, :f, :c, :dual, :t, :x], [Int, T, T, T, Float64, Char])
   verbose && @info log_row(Any[iter, fx, norm(cx), norm(dual), elapsed_time, 'c'])
   solved = norm(dual) < ϵd && norm(cx) < ϵp
@@ -189,12 +191,9 @@ function SolverCore.solve!(
     verbose && @info log_row(Any[iter, fx, norm(cx), norm(dual), elapsed_time, 'd'])
   end
 
-  set_objective!(stats, fx)
   set_residuals!(stats, norm(cx), norm(dual))
   z = has_bounds(nlp) ? zeros(T, nvar) : zeros(T, 0)
   set_multipliers!(stats, y, z, z)
-  set_time!(stats, elapsed_time)
   set_solution!(stats, x)
-  set_iter!(stats, iter)
   return stats
 end
