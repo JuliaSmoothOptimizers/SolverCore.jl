@@ -50,6 +50,7 @@ function SolverCore.solve!(
 ) where {T, S <: AbstractVector{T}}
   start_time = time()
   elapsed_time = 0.0
+  set_time!(stats, elapsed_time)
 
   nvar, ncon = nlp.meta.nvar, nlp.meta.ncon
   x = solver.x .= x0
@@ -91,13 +92,24 @@ function SolverCore.solve!(
   ϵp = atol
 
   fx = obj(nlp, x)
+  set_objective!(stats, fx)
   verbose && @info log_header([:iter, :f, :c, :dual, :t, :x], [Int, T, T, T, Float64, Char])
   verbose && @info log_row(Any[iter, fx, norm(cx), norm(dual), elapsed_time, 'c'])
   solved = norm(dual) < ϵd && norm(cx) < ϵp
-  tired = neval_obj(nlp) + neval_cons(nlp) > max_eval || elapsed_time > max_time
-  user = false
 
-  while !(solved || tired || user)
+  set_status!(
+    stats,
+    get_status(
+      nlp,
+      elapsed_time = elapsed_time,
+      iter = iter,
+      optimal = solved,
+      max_eval = max_eval,
+      max_time = max_time,
+    )
+  )
+
+  while stats.status == :unknown
     # assume the model returns a dense Hessian in column-major order
     # NB: hess_coord!() only returns values in the lower triangle
     hess_coord!(nlp, x, y, view(hval, 1:nnzh))
@@ -156,34 +168,32 @@ function SolverCore.solve!(
     dresid = norm(dual)
     set_residuals!(stats, presid, dresid)
     solved = dresid < ϵd && presid < ϵp
-    tired = neval_obj(nlp) + neval_cons(nlp) > max_eval || elapsed_time > max_time
 
     iter += 1
     fx = obj(nlp, x)
     set_iter!(stats, iter)
     set_objective!(stats, fx)
 
+    set_status!(
+      stats,
+      get_status(
+        nlp,
+        elapsed_time = elapsed_time,
+        iter = iter,
+        optimal = solved,
+        max_eval = max_eval,
+        max_time = max_time,
+      )
+    )
+
     callback(nlp, solver, stats)
-    user = stats.status == :user
 
     verbose && @info log_row(Any[iter, fx, norm(cx), norm(dual), elapsed_time, 'd'])
   end
 
-  status = if solved
-    :first_order
-  elseif elapsed_time > max_time
-    :max_time
-  else
-    :max_eval
-  end
-
-  set_status!(stats, status)
-  set_objective!(stats, fx)
   set_residuals!(stats, norm(cx), norm(dual))
   z = has_bounds(nlp) ? zeros(T, nvar) : zeros(T, 0)
   set_multipliers!(stats, y, z, z)
-  set_time!(stats, elapsed_time)
   set_solution!(stats, x)
-  set_iter!(stats, iter)
   return stats
 end
