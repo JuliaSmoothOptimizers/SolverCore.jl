@@ -106,7 +106,7 @@ function SolverCore.solve!(
       optimal = solved,
       max_eval = max_eval,
       max_time = max_time,
-    )
+    ),
   )
 
   while stats.status == :unknown
@@ -183,7 +183,7 @@ function SolverCore.solve!(
         optimal = solved,
         max_eval = max_eval,
         max_time = max_time,
-      )
+      ),
     )
 
     callback(nlp, solver, stats)
