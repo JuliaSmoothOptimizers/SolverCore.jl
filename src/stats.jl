@@ -454,11 +454,12 @@ The keyword arguments may contain:
 - `elapsed_time::Float64 = 0.0`: current elapsed time (default: `0.0`);
 - `iter::Integer = 0`: current number of iterations (default: `0`);
 - `optimal::Bool = false`: `true` if the problem reached an optimal solution (default: `false`);
+- `small_residual::Bool = false`: `true` if the nonlinear least squares problem reached a solution with small residual (default: `false`);
 - `infeasible::Bool = false`: `true` if the problem is infeasible (default: `false`);
 - `parameter_too_large::Bool = false`: `true` if the parameters are loo large (default: `false`);
 - `unbounded::Bool = false`: `true` if the problem is unbounded (default: `false`);
 - `stalled::Bool = false`: `true` if the algorithm is stalling (default: `false`);
-- `max_eval::Integer`: limit on the number of evaluations of objective and constraints (default: `typemax(Int)`);
+- `max_eval::Integer`: limit on the number of evaluations defined by `eval_fun` (default: `typemax(Int)`);
 - `max_time::Float64 = Inf`: limit on the time (default: `Inf`);
 - `max_iter::Integer`: limit on the number of iterations (default: `typemax(Int)`).
 """
@@ -467,16 +468,20 @@ function get_status(
   elapsed_time::Float64 = 0.0,
   iter::Integer = 0,
   optimal::Bool = false,
+  small_residual::Bool = false,
   infeasible::Bool = false,
   parameter_too_large::Bool = false,
   unbounded::Bool = false,
   stalled::Bool = false,
+  exception::Bool = false,
   max_eval::Integer = typemax(Int),
   max_time::Float64 = Inf,
   max_iter::Integer = typemax(Int),
 )
   if optimal
     :first_order
+  elseif small_residual
+    :small_residual
   elseif infeasible
     :infeasible
   elseif unbounded
@@ -485,13 +490,17 @@ function get_status(
     :stalled
   elseif iter > max_iter
     :max_iter
-  elseif neval_obj(nlp) + neval_cons(nlp) > max_eval ≥ 0
+  elseif eval_fun(nlp) > max_eval ≥ 0
     :max_eval
   elseif elapsed_time > max_time
     :max_time
   elseif parameter_too_large
     :stalled
+  elseif exception
+    :exception
   else
     :unknown
   end
 end
+  
+eval_fun(nlp::AbstractNLPModel) = neval_obj(nlp) + neval_cons(nlp)
