@@ -1,6 +1,7 @@
 export AbstractExecutionStats,
   GenericExecutionStats,
   set_status!,
+  get_status,
   set_solution!,
   set_objective!,
   set_residuals!,
