@@ -503,5 +503,5 @@ function get_status(
     :unknown
   end
 end
-  
+
 eval_fun(nlp::AbstractNLPModel) = neval_obj(nlp) + neval_cons(nlp)

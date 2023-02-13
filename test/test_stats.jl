@@ -154,7 +154,7 @@ test_stats()
   @test get_status(nlp, unbounded = true) == :unbounded
   @test get_status(nlp, stalled = true) == :stalled
   @test get_status(nlp, iter = 8, max_iter = 5) == :max_iter
-  for i=1:2
+  for i = 1:2
     increment!(nlp, :neval_obj)
   end
   @test get_status(nlp, max_eval = 1) == :max_eval
