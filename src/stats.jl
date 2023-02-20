@@ -489,7 +489,7 @@ function get_status(
     :unbounded
   elseif stalled
     :stalled
-  elseif iter > max_iter
+  elseif iter > max_iter ≥ 0
     :max_iter
   elseif eval_fun(nlp) > max_eval ≥ 0
     :max_eval
