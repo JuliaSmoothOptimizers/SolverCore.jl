@@ -505,3 +505,4 @@ function get_status(
 end
 
 eval_fun(nlp::AbstractNLPModel) = neval_obj(nlp) + neval_cons(nlp)
+eval_fun(nls::AbstractNLSModel) = neval_residual(nls) + neval_cons(nls)

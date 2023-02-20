@@ -163,3 +163,21 @@ test_stats()
   @test get_status(nlp, exception = true) == :exception
   @test get_status(nlp) == :unknown
 end
+
+@testset "Test get_status for NLS" begin
+  nlp = ADNLSModel(x -> [x], ones(2), 2)
+  @test get_status(nlp, optimal = true) == :first_order
+  @test get_status(nlp, small_residual = true) == :small_residual
+  @test get_status(nlp, infeasible = true) == :infeasible
+  @test get_status(nlp, unbounded = true) == :unbounded
+  @test get_status(nlp, stalled = true) == :stalled
+  @test get_status(nlp, iter = 8, max_iter = 5) == :max_iter
+  for i = 1:2
+    increment!(nlp, :neval_residual)
+  end
+  @test get_status(nlp, max_eval = 1) == :max_eval
+  @test get_status(nlp, elapsed_time = 60.0, max_time = 1.0) == :max_time
+  @test get_status(nlp, parameter_too_large = true) == :stalled
+  @test get_status(nlp, exception = true) == :exception
+  @test get_status(nlp) == :unknown
+end
