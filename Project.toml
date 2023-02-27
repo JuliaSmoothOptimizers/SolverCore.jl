@@ -1,6 +1,6 @@
 name = "SolverCore"
 uuid = "ff4d7338-4cf1-434d-91df-b86cb86fb843"
-version = "0.3.5"
+version = "0.3.6"
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
