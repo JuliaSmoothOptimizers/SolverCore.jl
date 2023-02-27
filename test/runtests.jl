@@ -7,7 +7,6 @@ using ADNLPModels, NLPModels
 # stdlib
 using LinearAlgebra, Logging, Test
 
-
 if VERSION ≥ v"1.6"
   @testset "Test allocations of solver specific" begin
     nlp = ADNLPModel(x -> sum(x), ones(2))
