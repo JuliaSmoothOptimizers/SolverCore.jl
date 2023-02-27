@@ -12,6 +12,7 @@ export AbstractExecutionStats,
   set_bounds_multipliers!,
   set_iter!,
   set_time!,
+  broadcast_solver_specific!,
   set_solver_specific!,
   statsgetfield,
   statshead,
@@ -318,22 +319,27 @@ function set_time!(stats::GenericExecutionStats, time::Float64)
 end
 
 """
+    broadcast_solver_specific!(stats::GenericExecutionStats, field::Symbol, value)
+
+Broadcast `value` as a solver-specific value identified by `field` in `stats`
+and mark it as reliable.
+"""
+function broadcast_solver_specific!(stats::GenericExecutionStats, field::Symbol, value)
+  if field ∈ keys(stats.solver_specific)
+    stats.solver_specific[field] .= value
+  end
+  stats.solver_specific_reliable = true
+  stats
+end
+
+"""
     set_solver_specific!(stats::GenericExecutionStats, field::Symbol, value)
 
 Register `value` as a solver-specific value identified by `field` in `stats`
 and mark it as reliable.
 """
 function set_solver_specific!(stats::GenericExecutionStats, field::Symbol, value)
-  if field ∈ keys(stats.solver_specific)
-    try
-      # will fail if typeof(solver_specific[field]) does not support broadcast
-      stats.solver_specific[field] .= value
-    catch
-      stats.solver_specific[field] = value
-    end
-  else
-    stats.solver_specific[field] = value
-  end
+  stats.solver_specific[field] = value
   stats.solver_specific_reliable = true
   stats
 end

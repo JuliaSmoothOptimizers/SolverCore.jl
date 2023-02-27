@@ -10,6 +10,7 @@ function test_stats()
   set_solver_specific!(stats, :matvec, 10)
   set_solver_specific!(stats, :dot, 25)
   set_solver_specific!(stats, :empty_vec, [])
+  broadcast_solver_specific!(stats, :empty_vec, [])
   set_solver_specific!(stats, :axpy, 20)
   set_solver_specific!(stats, :ray, -1 ./ (1:100))
 
