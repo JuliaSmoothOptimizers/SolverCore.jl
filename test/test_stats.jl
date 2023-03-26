@@ -166,7 +166,7 @@ test_stats()
 end
 
 @testset "Test get_status for NLS" begin
-  nlp = ADNLSModel(x -> [x], ones(2), 2)
+  nlp = ADNLSModel(x -> x, ones(2), 2)
   @test get_status(nlp, optimal = true) == :first_order
   @test get_status(nlp, small_residual = true) == :small_residual
   @test get_status(nlp, infeasible = true) == :infeasible
