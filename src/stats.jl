@@ -66,13 +66,13 @@ abstract type AbstractExecutionStats end
 """
     GenericExecutionStats(nlp; ...)
 
-A GenericExecutionStats is a struct for storing output information of solvers.
+A GenericExecutionStats is a struct for storing the output information of solvers.
 It contains the following fields:
 - `status`: Indicates the output of the solver. Use `show_statuses()` for the full list;
 - `solution`: The final approximation returned by the solver (default: an uninitialized vector like `nlp.meta.x0`);
 - `objective`: The objective value at `solution` (default: `Inf`);
 - `dual_feas`: The dual feasibility norm at `solution` (default: `Inf`);
-- `primal_feas`: The primal feasibility norm at `solution` (default: `0.0` if uncontrained, `Inf` otherwise);
+- `primal_feas`: The primal feasibility norm at `solution` (default: `0.0` if unconstrained, `Inf` otherwise);
 - `multipliers`: The Lagrange multipliers wrt to the constraints (default: an uninitialized vector like `nlp.meta.y0`);
 - `multipliers_L`: The Lagrange multipliers wrt to the lower bounds on the variables (default: an uninitialized vector like `nlp.meta.x0` if there are bounds, or a zero-length vector if not);
 - `multipliers_U`: The Lagrange multipliers wrt to the upper bounds on the variables (default: an uninitialized vector like `nlp.meta.x0` if there are bounds, or a zero-length vector if not);
