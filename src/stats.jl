@@ -65,6 +65,7 @@ abstract type AbstractExecutionStats end
 
 """
     GenericExecutionStats(nlp; ...)
+    GenericExecutionStats{T, S, V, Tsp}(;...)
 
 A GenericExecutionStats is a struct for storing the output information of solvers.
 It contains the following fields:
@@ -100,7 +101,9 @@ the field value as reliable.
 
 The `reset!()` method marks all fields as unreliable.
 
-`nlp` is mandatory to set default optional fields. 
+`nlp` is highly recommended to set default optional fields.
+If it is not provided, the function `reset!(stats, nlp)` should be called before `solve!`.
+
 All other variables can be input as keyword arguments.
 
 Notice that `GenericExecutionStats` does not compute anything, it simply stores.
@@ -127,6 +130,44 @@ mutable struct GenericExecutionStats{T, S, V, Tsp} <: AbstractExecutionStats
   elapsed_time::Float64
   solver_specific_reliable::Bool
   solver_specific::Dict{Symbol, Tsp}
+end
+
+function GenericExecutionStats{T, S, V, Tsp}(;
+  status::Symbol = :unknown,
+  solution::S = S(),
+  objective::T = T(Inf),
+  dual_feas::T = T(Inf),
+  primal_feas::T = T(Inf),
+  multipliers::S = S(),
+  multipliers_L::V = V(),
+  multipliers_U::V = V(),
+  iter::Int = -1,
+  elapsed_time::Real = Inf,
+  solver_specific::Dict{Symbol, Tsp} = Dict{Symbol, Any}(),
+) where {T, S, V, Tsp}
+  return GenericExecutionStats{T, S, V, Tsp}(
+    false,
+    status,
+    false,
+    solution,
+    false,
+    objective,
+    false,
+    dual_feas,
+    false,
+    primal_feas,
+    false,
+    multipliers,
+    false,
+    multipliers_L,
+    multipliers_U,
+    false,
+    iter,
+    false,
+    elapsed_time,
+    false,
+    solver_specific,
+  )
 end
 
 function GenericExecutionStats(
@@ -171,9 +212,12 @@ end
 
 """
     reset!(stats::GenericExecutionStats)
+    reset!(stats::GenericExecutionStats, nlp::AbstractNLPModel)
 
 Reset the internal flags of `stats` to `false` to Indicate
 that the contents should not be trusted.
+If an `AbstractNLPModel` is also provided, 
+the pre-allocated vectors are adjusted to the problem size.
 """
 function NLPModels.reset!(stats::GenericExecutionStats)
   stats.status_reliable = false
@@ -186,6 +230,15 @@ function NLPModels.reset!(stats::GenericExecutionStats)
   stats.iter_reliable = false
   stats.time_reliable = false
   stats.solver_specific_reliable = false
+  stats
+end
+
+function NLPModels.reset!(stats::GenericExecutionStats{T, S}, nlp::AbstractNLPModel{T, S}) where {T, S}
+  stats.solution = similar(nlp.meta.x0)
+  stats.multipliers = similar(nlp.meta.y0)
+  stats.multipliers_L = similar(nlp.meta.y0, has_bounds(nlp) ? nlp.meta.nvar : 0)
+  stats.multipliers_U = similar(nlp.meta.y0, has_bounds(nlp) ? nlp.meta.nvar : 0)
+  reset!(stats)
   stats
 end
 
