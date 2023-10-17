@@ -55,6 +55,15 @@ function test_stats()
       @test typeof(stats.objective) == T
       @test typeof(stats.dual_feas) == T
       @test typeof(stats.primal_feas) == T
+
+      S = Vector{T}
+      stats = GenericExecutionStats{T, S, S, Any}()
+      set_status!(stats, :first_order)
+      @test stats.status == :first_order
+      @test stats.status_reliable
+      @test typeof(stats.objective) == T
+      @test typeof(stats.dual_feas) == T
+      @test typeof(stats.primal_feas) == T
     end
   end
 
@@ -62,6 +71,9 @@ function test_stats()
     stats = GenericExecutionStats(nlp)
     @test_throws Exception set_status!(stats, :bad)
     @test_throws Exception GenericExecutionStats(:unkwown, nlp, bad = true)
+
+    stats = GenericExecutionStats{Float64, Vector{Float64}, Vector{Float64}, Any}()
+    @test_throws Exception set_status!(stats, :bad)
   end
 
   @testset "Testing Dummy Solver with multi-precision" begin
@@ -84,6 +96,19 @@ function test_stats()
       solver = SolverCore.DummySolver(nlp)
       stats = GenericExecutionStats(nlp)
 
+      with_logger(NullLogger()) do
+        solve!(solver, nlp, stats)
+      end
+      @test typeof(stats.objective) == T
+      @test typeof(stats.dual_feas) == T
+      @test typeof(stats.primal_feas) == T
+      @test eltype(stats.solution) == T
+      @test eltype(stats.multipliers) == T
+      @test eltype(stats.multipliers_L) == T
+      @test eltype(stats.multipliers_U) == T
+
+      stats = GenericExecutionStats{T, Vector{T}, Vector{T}, Any}()
+      reset!(stats, nlp)
       with_logger(NullLogger()) do
         solve!(solver, nlp, stats)
       end
