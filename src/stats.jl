@@ -233,7 +233,10 @@ function NLPModels.reset!(stats::GenericExecutionStats)
   stats
 end
 
-function NLPModels.reset!(stats::GenericExecutionStats{T, S}, nlp::AbstractNLPModel{T, S}) where {T, S}
+function NLPModels.reset!(
+  stats::GenericExecutionStats{T, S},
+  nlp::AbstractNLPModel{T, S},
+) where {T, S}
   stats.solution = similar(nlp.meta.x0)
   stats.multipliers = similar(nlp.meta.y0)
   stats.multipliers_L = similar(nlp.meta.y0, has_bounds(nlp) ? nlp.meta.nvar : 0)
