@@ -9,7 +9,11 @@ makedocs(
     prettyurls = get(ENV, "CI", nothing) == "true",
   ),
   sitename = "SolverCore.jl",
-  pages = ["Home" => "index.md", "Reference" => "reference.md"],
+  pages = [
+    "Home" => "index.md",
+    "JSO-compliant solvers" => "jso-compliant.md",
+    "Reference" => "reference.md",
+  ],
 )
 
 deploydocs(
