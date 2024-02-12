@@ -1,6 +1,6 @@
-Copyright (c) 2015-2021: Dominique Orban and Abel Soares Siqueira
+Copyright (c) 2015-present: Tangi Migot and Dominique Orban and Abel Soares Siqueira
 
-SolverTools.jl is licensed under the [MPL version 2.0](https://www.mozilla.org/MPL/2.0/).
+SolverCore.jl is licensed under the [MPL version 2.0](https://www.mozilla.org/MPL/2.0/).
 
 ## License
 
