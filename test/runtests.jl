@@ -2,14 +2,14 @@
 using SolverCore
 
 # Auxiliary packages
-using ADNLPModels, NLPModels
+using NLPModels, NLPModelsTest
 
 # stdlib
 using LinearAlgebra, Logging, Test
 
 if VERSION ≥ v"1.6"
   @testset "Test allocations of solver specific" begin
-    nlp = ADNLPModel(x -> sum(x), ones(2))
+    nlp = BROWNDEN()
     stats = GenericExecutionStats(nlp) # stats = GenericExecutionStats(nlp, solver_specific = Dict{Symbol, Bool}())
     function fake_solver(stats)
       set_solver_specific!(stats, :test, true)

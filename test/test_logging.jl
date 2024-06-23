@@ -1,9 +1,5 @@
 function test_logging()
-  nlps = [ADNLPModel(x -> sum(x .^ k), ones(2k), name = "Sum of power $k") for k = 2:4]
-  push!(
-    nlps,
-    ADNLPModel(x -> dot(x, x), ones(2), x -> [sum(x) - 1], [0.0], [0.0], name = "linquad"),
-  )
+  nlp = HS10()
 
   @info "Testing logger"
   log_header([:col_float, :col_int, :col_symbol, :col_string], [Float64, Int, Symbol, String])
@@ -12,8 +8,7 @@ function test_logging()
 
   with_logger(ConsoleLogger()) do
     @info "Testing dummy solver with logger"
-    SolverCore.dummy_solver(nlps[1], max_eval = 20)
-    reset!.(nlps)
+    SolverCore.dummy_solver(nlp, max_eval = 20)
   end
 end
 
