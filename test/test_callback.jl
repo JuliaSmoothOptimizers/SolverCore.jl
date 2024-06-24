@@ -1,6 +1,5 @@
 @testset "test callback" begin
-  nlp =
-    ADNLPModel(x -> dot(x, x) / 2, ones(2), x -> [sum(x .^ 3) - 1], [0.0], [0.0], name = "linquad")
+  nlp = HS10()
   callback(nlp, solver, stats) = begin
     if stats.iter ≥ 3
       set_status!(stats, :user)

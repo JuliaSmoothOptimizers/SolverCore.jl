@@ -1,5 +1,5 @@
 @testset "test restart" begin
-  nlp = ADNLPModel(x -> dot(x, x) / 2, ones(2), x -> [sum(x .^ 3) - 1], [0.0], [0.0])
+  nlp = HS10()
   solver = SolverCore.DummySolver(nlp)
   stats = GenericExecutionStats(nlp)
   solve!(solver, nlp, stats, verbose = false)
@@ -10,7 +10,7 @@
   solve!(solver, nlp, stats, verbose = false)
   @test stats.status == :first_order
   # Try with a new problem of the same size
-  nlp = ADNLPModel(x -> dot(x, x) / 2, ones(2), x -> [sum(x .^ 3)], [0.0], [0.0])
+  nlp = HS10()
   reset!(solver, nlp)
   solve!(solver, nlp, stats, verbose = false)
   @test stats.status == :first_order

@@ -1,6 +1,6 @@
 function test_stats()
   show_statuses()
-  nlp = ADNLPModel(x -> dot(x, x), zeros(2))
+  nlp = HS10()
   stats = GenericExecutionStats(nlp)
   set_status!(stats, :first_order)
   set_objective!(stats, 1.0)
@@ -36,7 +36,7 @@ function test_stats()
 
   @testset "Testing inference" begin
     for T in (Float16, Float32, Float64, BigFloat)
-      nlp = ADNLPModel(x -> dot(x, x), ones(T, 2))
+      nlp = BROWNDEN(T)
 
       stats = GenericExecutionStats(nlp)
       set_status!(stats, :first_order)
@@ -46,7 +46,7 @@ function test_stats()
       @test typeof(stats.dual_feas) == T
       @test typeof(stats.primal_feas) == T
 
-      nlp = ADNLPModel(x -> dot(x, x), ones(T, 2), x -> [sum(x) - 1], T[0], T[0])
+      nlp = HS14(T)
 
       stats = GenericExecutionStats(nlp)
       set_status!(stats, :first_order)
@@ -78,26 +78,11 @@ function test_stats()
 
   @testset "Testing Dummy Solver with multi-precision" begin
     for T in (Float16, Float32, Float64, BigFloat)
-      nlp = ADNLPModel(x -> dot(x, x), ones(T, 2))
+      nlp = HS10(T)
       solver = SolverCore.DummySolver(nlp)
 
       stats = with_logger(NullLogger()) do
         solve!(solver, nlp)
-      end
-      @test typeof(stats.objective) == T
-      @test typeof(stats.dual_feas) == T
-      @test typeof(stats.primal_feas) == T
-      @test eltype(stats.solution) == T
-      @test eltype(stats.multipliers) == T
-      @test eltype(stats.multipliers_L) == T
-      @test eltype(stats.multipliers_U) == T
-
-      nlp = ADNLPModel(x -> dot(x, x), ones(T, 2), x -> [sum(x) - 1], T[0], T[0])
-      solver = SolverCore.DummySolver(nlp)
-      stats = GenericExecutionStats(nlp)
-
-      with_logger(NullLogger()) do
-        solve!(solver, nlp, stats)
       end
       @test typeof(stats.objective) == T
       @test typeof(stats.dual_feas) == T
@@ -124,7 +109,7 @@ function test_stats()
 
   @testset "Test stats setters" begin
     T = Float64
-    nlp = ADNLPModel(x -> dot(x, x), ones(T, 2), x -> [sum(x) - 1], T[0], T[0])
+    nlp = HS14(T)
     stats = GenericExecutionStats(nlp)
     fields = (
       "status",
@@ -173,7 +158,7 @@ end
 test_stats()
 
 @testset "Test get_status" begin
-  nlp = ADNLPModel(x -> sum(x), ones(2))
+  nlp = BROWNDEN()
   @test get_status(nlp, optimal = true) == :first_order
   @test get_status(nlp, small_residual = true) == :small_residual
   @test get_status(nlp, infeasible = true) == :infeasible
@@ -191,7 +176,7 @@ test_stats()
 end
 
 @testset "Test get_status for NLS" begin
-  nlp = ADNLSModel(x -> x, ones(2), 2)
+  nlp = BNDROSENBROCK()
   @test get_status(nlp, optimal = true) == :first_order
   @test get_status(nlp, small_residual = true) == :small_residual
   @test get_status(nlp, infeasible = true) == :infeasible
