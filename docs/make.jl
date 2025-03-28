@@ -1,23 +1,21 @@
-using Documenter, SolverCore
+using SolverCore
+using Documenter
 
-makedocs(
+DocMeta.setdocmeta!(SolverCore, :DocTestSetup, :(using SolverCore); recursive = true)
+
+const page_rename = Dict("developer.md" => "Developer docs") # Without the numbers
+const numbered_pages = [
+  file for
+  file in readdir(joinpath(@__DIR__, "src")) if file != "index.md" && splitext(file)[2] == ".md"
+]
+
+makedocs(;
   modules = [SolverCore],
-  doctest = true,
-  linkcheck = true,
-  format = Documenter.HTML(
-    assets = ["assets/style.css"],
-    prettyurls = get(ENV, "CI", nothing) == "true",
-  ),
+  authors = "Tangi Migot <tangi.migot@gmail.com>, Abel Soares Siqueira <abel.s.siqueira@gmail.com>, Dominique Orban <dominique.orban@gerad.ca>",
+  repo = "https://github.com/JuliaSmoothOptimizers/SolverCore.jl/blob/{commit}{path}#{line}",
   sitename = "SolverCore.jl",
-  pages = [
-    "Home" => "index.md",
-    "JSO-compliant solvers" => "jso-compliant.md",
-    "Reference" => "reference.md",
-  ],
+  format = Documenter.HTML(; canonical = "https://JuliaSmoothOptimizers.github.io/SolverCore.jl"),
+  pages = ["index.md"; numbered_pages],
 )
 
-deploydocs(
-  repo = "github.com/JuliaSmoothOptimizers/SolverCore.jl.git",
-  push_preview = true,
-  devbranch = "main",
-)
+deploydocs(; repo = "github.com/JuliaSmoothOptimizers/SolverCore.jl")
