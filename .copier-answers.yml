@@ -1,0 +1,30 @@
+# Changes here will be overwritten by Copier
+AddAllcontributors: true
+AddCodeOfConduct: true
+AddContributionDocs: true
+AddCopierCI: false
+AddGitHubTemplates: true
+AddMacToCI: true
+AddPrecommit: true
+AddWinToCI: true
+AnswerStrategy: ask
+Authors: Tangi Migot <tangi.migot@gmail.com>, Abel Soares Siqueira <abel.s.siqueira@gmail.com>,
+    Dominique Orban <dominique.orban@gerad.ca>
+AutoIncludeTests: true
+CheckExplicitImports: true
+CodeOfConductContact: tangi.migot@gmail.com
+ConfigIndentation: 2
+ExplicitImportsChecklist: exclude_all_qualified_access_are_public
+JuliaIndentation: 2
+JuliaMinCIVersion: lts
+JuliaMinVersion: lts
+License: MPL-2.0
+LicenseCopyrightHolders: Tangi Migot, Abel Soares Siqueira, Dominique Orban
+MarkdownIndentation: 2
+PackageName: SolverCore
+PackageOwner: JuliaSmoothOptimizers
+PackageUUID: ff4d7338-4cf1-434d-91df-b86cb86fb843
+RunJuliaNightlyOnCI: true
+UseCirrusCI: false
+_commit: v0.15.0
+_src_path: https://github.com/JuliaBesties/BestieTemplate.jl
