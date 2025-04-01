@@ -79,7 +79,7 @@ function test_stats()
   @testset "Testing Dummy Solver with multi-precision" begin
     for T in (Float16, Float32, Float64, BigFloat)
       nlp = HS10(T)
-      solver = SolverCore.DummySolver(nlp)
+      solver = DummySolver(nlp)
 
       stats = with_logger(NullLogger()) do
         solve!(solver, nlp)
@@ -93,7 +93,7 @@ function test_stats()
       @test eltype(stats.multipliers_U) == T
 
       stats = GenericExecutionStats{T, Vector{T}, Vector{T}, Any}()
-      reset!(stats, nlp)
+      SolverCore.reset!(stats, nlp)
       with_logger(NullLogger()) do
         solve!(solver, nlp, stats)
       end
@@ -147,7 +147,7 @@ function test_stats()
     @test stats.time_reliable
     set_solver_specific!(stats, :bla, "boo!")
     @test stats.solver_specific_reliable
-    reset!(stats)
+    SolverCore.reset!(stats)
     for f ∈ fields
       val = getfield(stats, Symbol("$(f)_reliable"))
       @test val == false
