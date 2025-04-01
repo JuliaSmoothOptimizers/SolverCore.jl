@@ -10,6 +10,8 @@ using NLPModels:
   neval_residual,
   unconstrained
 
+import NLPModels: reset!
+
 """
     reset!(stats::GenericExecutionStats, nlp::AbstractNLPModel)
 
