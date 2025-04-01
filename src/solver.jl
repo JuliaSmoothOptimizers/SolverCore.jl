@@ -1,4 +1,4 @@
-export AbstractSolver, AbstractOptimizationSolver, solve!
+export AbstractSolver, AbstractOptimizationSolver, solve!, reset!
 
 "Abstract type from which JSO solvers derive."
 abstract type AbstractSolver end
@@ -6,13 +6,15 @@ abstract type AbstractSolver end
 abstract type AbstractOptimizationSolver <: AbstractSolver end
 
 """
-    reset!(solver::AbstractOptimizationSolver, model::AbstractNLPModel)
+    reset!(solver::::AbstractSolver, model)
+    reset!(solver::::AbstractSolver)
 
 Use in the context of restarting or reusing the `solver` structure.
 Reset the internal fields of `solver` for the `model` before calling `solve!` on the same structure.
 `model` must have the same number of variables, bounds and constraints as that used to instantiate `solver`.
 """
-function NLPModels.reset!(::AbstractOptimizationSolver, ::AbstractNLPModel) end
+function reset!(solver::AbstractSolver) end
+function reset!(solver::AbstractSolver, model) end
 
 """
     solve!(solver, model; kwargs...)
@@ -22,8 +24,8 @@ Apply `solver` to `model`.
 
 # Arguments
 
-- `solver::AbstractOptimizationSolver`: solver structure to hold all storage necessary for a solve
-- `model::AbstractNLPModel`: the model solved, see `NLPModels.jl`
+- `solver::::AbstractSolver`: solver structure to hold all storage necessary for a solve
+- `model`: the model solved
 - `stats::GenericExecutionStats`: stats structure to hold solution information.
 
 The first invocation allocates and returns a new `GenericExecutionStats`.
@@ -35,14 +37,5 @@ The `kwargs` are passed to the solver.
 
 - `stats::GenericExecutionStats`: stats structure holding solution information.
 """
-function solve!(solver::AbstractOptimizationSolver, model::AbstractNLPModel; kwargs...)
-  stats = GenericExecutionStats(model)
-  solve!(solver, model, stats; kwargs...)
-end
-
-function solve!(
-  ::AbstractOptimizationSolver,
-  ::AbstractNLPModel,
-  ::GenericExecutionStats;
-  kwargs...,
-) end
+function solve!(solver::AbstractSolver, model; kwargs...) end
+function solve!(solver::AbstractSolver, model, stats; kwargs...) end
