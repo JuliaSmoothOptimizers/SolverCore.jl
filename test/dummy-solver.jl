@@ -36,7 +36,7 @@ function dummy_solver(
   solve!(solver, nlp, stats, args...; kwargs...)
 end
 
-function solve!(
+function SolverCore.solve!(
   solver::DummySolver{S},
   nlp::AbstractNLPModel{T, S},
   stats::GenericExecutionStats;

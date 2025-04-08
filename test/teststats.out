@@ -4,7 +4,7 @@ Generic Execution stats
   primal feasibility: 0.0
   dual feasibility: 1.0e-12
   solution: [1.0  1.0]
-  multipliers: [1.0e-323]
+  multipliers: [0.0]
   iterations: 10
   elapsed time: Inf
   solver specific:
@@ -19,7 +19,7 @@ Generic Execution stats
   primal feasibility: 0.0
   dual feasibility: 1.0e-12
   solution: [1.0, 1.0]
-  multipliers: [1.0e-323]
+  multipliers: [0.0]
   iterations: 10
   elapsed time: Inf
   solver specific:

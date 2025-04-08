@@ -5,6 +5,8 @@ using NLPModels, NLPModelsTest
 # stdlib
 using LinearAlgebra, Logging
 
+include("dummy-solver.jl")
+
 #=
 Don't add your tests to runtests.jl. Instead, create files named
 
