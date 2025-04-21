@@ -170,56 +170,14 @@ function GenericExecutionStats{T, S, V, Tsp}(;
   )
 end
 
-function GenericExecutionStats(
-  nlp::AbstractNLPModel{T, S};
-  status::Symbol = :unknown,
-  solution::S = similar(nlp.meta.x0),
-  objective::T = T(Inf),
-  dual_feas::T = T(Inf),
-  primal_feas::T = unconstrained(nlp) ? zero(T) : T(Inf),
-  multipliers::S = similar(nlp.meta.y0),
-  multipliers_L::V = similar(nlp.meta.y0, has_bounds(nlp) ? nlp.meta.nvar : 0),
-  multipliers_U::V = similar(nlp.meta.y0, has_bounds(nlp) ? nlp.meta.nvar : 0),
-  iter::Int = -1,
-  elapsed_time::Real = Inf,
-  solver_specific::Dict{Symbol, Tsp} = Dict{Symbol, Any}(),
-) where {T, S, V, Tsp}
-  check_status(status)
-  return GenericExecutionStats{T, S, V, Tsp}(
-    false,
-    status,
-    false,
-    solution,
-    false,
-    objective,
-    false,
-    dual_feas,
-    false,
-    primal_feas,
-    false,
-    multipliers,
-    false,
-    multipliers_L,
-    multipliers_U,
-    false,
-    iter,
-    false,
-    elapsed_time,
-    false,
-    solver_specific,
-  )
-end
-
 """
     reset!(stats::GenericExecutionStats)
-    reset!(stats::GenericExecutionStats, nlp::AbstractNLPModel)
+    reset!(stats::GenericExecutionStats, problem)
 
 Reset the internal flags of `stats` to `false` to Indicate
 that the contents should not be trusted.
-If an `AbstractNLPModel` is also provided,
-the pre-allocated vectors are adjusted to the problem size.
 """
-function NLPModels.reset!(stats::GenericExecutionStats)
+function reset!(stats::GenericExecutionStats{T, S, V, Tsp}) where {T, S, V, Tsp}
   stats.status_reliable = false
   stats.solution_reliable = false
   stats.objective_reliable = false
@@ -233,16 +191,8 @@ function NLPModels.reset!(stats::GenericExecutionStats)
   stats
 end
 
-function NLPModels.reset!(
-  stats::GenericExecutionStats{T, S},
-  nlp::AbstractNLPModel{T, S},
-) where {T, S}
-  stats.solution = similar(nlp.meta.x0)
-  stats.multipliers = similar(nlp.meta.y0)
-  stats.multipliers_L = similar(nlp.meta.y0, has_bounds(nlp) ? nlp.meta.nvar : 0)
-  stats.multipliers_U = similar(nlp.meta.y0, has_bounds(nlp) ? nlp.meta.nvar : 0)
-  reset!(stats)
-  stats
+function reset!(stats::GenericExecutionStats, problem::Any)
+  return reset!(stats)
 end
 
 """
@@ -508,7 +458,7 @@ function getStatus(stats::AbstractExecutionStats)
 end
 
 """
-get_status(nlp, kwargs...)
+    get_status(problem, kwargs...)
 
 Return the output of the solver based on the information in the keyword arguments.
 Use `show_statuses()` for the full list.
@@ -525,9 +475,11 @@ The keyword arguments may contain:
 - `max_eval::Integer`: limit on the number of evaluations defined by `eval_fun` (default: `typemax(Int)`);
 - `max_time::Float64 = Inf`: limit on the time (default: `Inf`);
 - `max_iter::Integer`: limit on the number of iterations (default: `typemax(Int)`).
+
+The `problem` is used to check number of evaluations with SolverCore.eval_fun(problem).
 """
 function get_status(
-  nlp::AbstractNLPModel;
+  nlp;
   elapsed_time::Float64 = 0.0,
   iter::Integer = 0,
   optimal::Bool = false,
@@ -565,6 +517,4 @@ function get_status(
     :unknown
   end
 end
-
-eval_fun(nlp::AbstractNLPModel) = neval_obj(nlp) + neval_cons(nlp)
-eval_fun(nls::AbstractNLSModel) = neval_residual(nls) + neval_cons(nls)
+eval_fun(::Any) = typemax(Int)

@@ -8,7 +8,7 @@ function test_logging()
 
   with_logger(ConsoleLogger()) do
     @info "Testing dummy solver with logger"
-    SolverCore.dummy_solver(nlp, max_eval = 20)
+    dummy_solver(nlp, max_eval = 20)
   end
 end
 
