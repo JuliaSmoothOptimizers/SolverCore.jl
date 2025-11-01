@@ -27,7 +27,7 @@ jobs:
     env:
       pkg: ${{ github.event.repository.name }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v2
         with:
           version: 1
@@ -56,7 +56,7 @@ jobs:
       matrix: ${{ fromJSON(needs.setup_matrix.outputs.matrix) }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
       # Install Julia
       - uses: julia-actions/setup-julia@v2
@@ -127,9 +127,9 @@ jobs:
     needs: break
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v4
         with:
           path: breakage
           pattern: breakage-*
@@ -159,8 +159,14 @@ jobs:
             fi
           done >> summary.md
 
+      - name: Display summary in CI logs
+        run: |
+          echo "### Breakage Summary" >> $GITHUB_STEP_SUMMARY
+          cat breakage/summary.md >> $GITHUB_STEP_SUMMARY
+
       - name: PR comment with file
-        uses: actions/github-script@v7
+        if: github.event.pull_request.head.repo.fork == false
+        uses: actions/github-script@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -199,3 +205,4 @@ jobs:
                 body: msg
               })
             }
+
