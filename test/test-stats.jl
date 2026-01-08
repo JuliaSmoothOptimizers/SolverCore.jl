@@ -165,6 +165,7 @@ test_stats()
   @test get_status(nlp, unbounded = true) == :unbounded
   @test get_status(nlp, stalled = true) == :stalled
   @test get_status(nlp, iter = 8, max_iter = 5) == :max_iter
+  @test get_status(nlp, prox_unbounded = true) == :prox_unbounded
   for i = 1:2
     increment!(nlp, :neval_obj)
   end
@@ -183,6 +184,7 @@ end
   @test get_status(nlp, unbounded = true) == :unbounded
   @test get_status(nlp, stalled = true) == :stalled
   @test get_status(nlp, iter = 8, max_iter = 5) == :max_iter
+  @test get_status(nlp, prox_unbounded = true) == :prox_unbounded
   for i = 1:2
     increment!(nlp, :neval_residual)
   end
