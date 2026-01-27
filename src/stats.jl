@@ -34,6 +34,7 @@ const STATUSES = Dict(
   :small_step => "step too small",
   :stalled => "stalled",
   :unbounded => "objective function may be unbounded from below",
+  :prox_unbounded => "the regularizer is not prox bounded",
   :unknown => "unknown",
   :user => "user-requested stop",
 )
@@ -469,6 +470,7 @@ The keyword arguments may contain:
 - `optimal::Bool = false`: `true` if the problem reached an optimal solution (default: `false`);
 - `small_residual::Bool = false`: `true` if the nonlinear least squares problem reached a solution with small residual (default: `false`);
 - `infeasible::Bool = false`: `true` if the problem is infeasible (default: `false`);
+- `prox_unbounded::Bool = false`: `true` if the regularizer is not prox bounded (default: `false`);
 - `parameter_too_large::Bool = false`: `true` if the parameters are loo large (default: `false`);
 - `unbounded::Bool = false`: `true` if the problem is unbounded (default: `false`);
 - `stalled::Bool = false`: `true` if the algorithm is stalling (default: `false`);
@@ -485,6 +487,7 @@ function get_status(
   optimal::Bool = false,
   small_residual::Bool = false,
   infeasible::Bool = false,
+  prox_unbounded = false,
   parameter_too_large::Bool = false,
   unbounded::Bool = false,
   stalled::Bool = false,
@@ -511,6 +514,8 @@ function get_status(
     :max_time
   elseif parameter_too_large
     :stalled
+  elseif prox_unbounded
+    :prox_unbounded
   elseif exception
     :exception
   else
