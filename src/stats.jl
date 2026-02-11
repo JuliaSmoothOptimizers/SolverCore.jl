@@ -468,11 +468,15 @@ The keyword arguments may contain:
 - `elapsed_time::Float64 = 0.0`: current elapsed time (default: `0.0`);
 - `iter::Integer = 0`: current number of iterations (default: `0`);
 - `optimal::Bool = false`: `true` if the problem reached an optimal solution (default: `false`);
+- `acceptable::Bool = false`: `true` if the problem reached a solution that is acceptable within tolerances (default: `false`);
 - `small_residual::Bool = false`: `true` if the nonlinear least squares problem reached a solution with small residual (default: `false`);
 - `infeasible::Bool = false`: `true` if the problem is infeasible (default: `false`);
 - `prox_unbounded::Bool = false`: `true` if the regularizer is not prox bounded (default: `false`);
 - `parameter_too_large::Bool = false`: `true` if the parameters are loo large (default: `false`);
 - `unbounded::Bool = false`: `true` if the problem is unbounded (default: `false`);
+- `neg_pred::Bool = false`: `true` if the predicted reduction is negative (default: `false`);
+- `not_desc::Bool = false`: `true` if the direction is not a descent direction (default: `false`);
+- `small_step::Bool = false`: `true` if the step is too small (default: `false`);
 - `stalled::Bool = false`: `true` if the algorithm is stalling (default: `false`);
 - `max_eval::Integer`: limit on the number of evaluations defined by `eval_fun` (default: `typemax(Int)`);
 - `max_time::Float64 = Inf`: limit on the time (default: `Inf`);
@@ -485,11 +489,15 @@ function get_status(
   elapsed_time::Float64 = 0.0,
   iter::Integer = 0,
   optimal::Bool = false,
+  acceptable::Bool = false,
   small_residual::Bool = false,
   infeasible::Bool = false,
-  prox_unbounded = false,
+  prox_unbounded::Bool = false,
   parameter_too_large::Bool = false,
   unbounded::Bool = false,
+  neg_pred::Bool = false,
+  not_desc::Bool = false,
+  small_step::Bool = false,
   stalled::Bool = false,
   exception::Bool = false,
   max_eval::Integer = typemax(Int),
@@ -498,12 +506,20 @@ function get_status(
 )
   if optimal
     :first_order
+  elseif acceptable
+    :acceptable
   elseif small_residual
     :small_residual
   elseif infeasible
     :infeasible
   elseif unbounded
     :unbounded
+  elseif neg_pred
+    :neg_pred
+  elseif not_desc
+    :not_desc
+  elseif small_step
+    :small_step
   elseif stalled
     :stalled
   elseif iter > max_iter ≥ 0

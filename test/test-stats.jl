@@ -160,9 +160,13 @@ test_stats()
 @testset "Test get_status" begin
   nlp = BROWNDEN()
   @test get_status(nlp, optimal = true) == :first_order
+  @test get_status(nlp, acceptable = true) == :acceptable
   @test get_status(nlp, small_residual = true) == :small_residual
   @test get_status(nlp, infeasible = true) == :infeasible
   @test get_status(nlp, unbounded = true) == :unbounded
+  @test get_status(nlp, neg_pred = true) == :neg_pred
+  @test get_status(nlp, not_desc = true) == :not_desc
+  @test get_status(nlp, small_step = true) == :small_step
   @test get_status(nlp, stalled = true) == :stalled
   @test get_status(nlp, iter = 8, max_iter = 5) == :max_iter
   @test get_status(nlp, prox_unbounded = true) == :prox_unbounded
