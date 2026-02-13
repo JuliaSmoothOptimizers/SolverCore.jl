@@ -78,6 +78,7 @@ function SolverCore.GenericExecutionStats(
   multipliers_L::V = similar(nlp.meta.y0, has_bounds(nlp) ? nlp.meta.nvar : 0),
   multipliers_U::V = similar(nlp.meta.y0, has_bounds(nlp) ? nlp.meta.nvar : 0),
   iter::Int = -1,
+  step_status::Symbol = :unknown,
   elapsed_time::Real = Inf,
   solver_specific::Dict{Symbol, Tsp} = Dict{Symbol, Any}(),
 ) where {T, S, V, Tsp}
@@ -100,6 +101,8 @@ function SolverCore.GenericExecutionStats(
     multipliers_U,
     false,
     iter,
+    false,
+    step_status,
     false,
     elapsed_time,
     false,
