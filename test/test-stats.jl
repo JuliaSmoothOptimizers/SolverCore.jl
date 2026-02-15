@@ -74,6 +74,7 @@ function test_stats()
 
     stats = GenericExecutionStats{Float64, Vector{Float64}, Vector{Float64}, Any}()
     @test_throws Exception set_status!(stats, :bad)
+    @test_throws Exception set_step_status!(stats, :medium_well)
   end
 
   @testset "Testing Dummy Solver with multi-precision" begin
@@ -120,6 +121,7 @@ function test_stats()
       "multipliers",
       "bounds_multipliers",
       "iter",
+      "step_status",
       "time",
       "solver_specific",
     )
@@ -143,6 +145,8 @@ function test_stats()
     @test stats.bounds_multipliers_reliable
     set_iter!(stats, 2)
     @test stats.iter_reliable
+    set_step_status!(stats, :accepted)
+    @test stats.step_status_reliable
     set_time!(stats, 0.1)
     @test stats.time_reliable
     set_solver_specific!(stats, :bla, "boo!")
