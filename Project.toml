@@ -1,6 +1,6 @@
 name = "SolverCore"
 uuid = "ff4d7338-4cf1-434d-91df-b86cb86fb843"
-version = "0.3.9"
+version = "0.3.10"
 
 [deps]
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
