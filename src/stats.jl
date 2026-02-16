@@ -19,7 +19,8 @@ export AbstractExecutionStats,
   statshead,
   statsline,
   getStatus,
-  show_statuses
+  show_statuses,
+  show_step_statuses
 
 const STATUSES = Dict(
   :exception => "unhandled exception",
@@ -106,7 +107,7 @@ It contains the following fields:
 - `multipliers_L`: The Lagrange multipliers wrt to the lower bounds on the variables (default: an uninitialized vector like `nlp.meta.x0` if there are bounds, or a zero-length vector if not);
 - `multipliers_U`: The Lagrange multipliers wrt to the upper bounds on the variables (default: an uninitialized vector like `nlp.meta.x0` if there are bounds, or a zero-length vector if not);
 - `iter`: The number of iterations computed by the solver (default: `-1`);
-- `step_status`: The status of the most recently computed step (`:unknown`, `:accepted` or `:rejected`);
+- `step_status`: The status of the most recently computed step. Use show_step_statuses() for the full list (default: `:unknown`);
 - `elapsed_time`: The elapsed time computed by the solver (default: `Inf`);
 - `solver_specific::Dict{Symbol,Any}`: A solver specific dictionary.
 
