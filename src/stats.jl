@@ -11,6 +11,7 @@ export AbstractExecutionStats,
   set_constraint_multipliers!,
   set_bounds_multipliers!,
   set_iter!,
+  set_step_status!,
   set_time!,
   broadcast_solver_specific!,
   set_solver_specific!,
@@ -18,7 +19,8 @@ export AbstractExecutionStats,
   statshead,
   statsline,
   getStatus,
-  show_statuses
+  show_statuses,
+  show_step_statuses
 
 const STATUSES = Dict(
   :exception => "unhandled exception",
@@ -62,6 +64,32 @@ function show_statuses()
   end
 end
 
+const STEP_STATUSES =
+  Dict(:unknown => "unknown", :accepted => "step accepted", :rejected => "step rejected")
+
+function check_step_status(step_status::Symbol)
+  if !(step_status in keys(STEP_STATUSES))
+    @error "step_status $step_status is not a valid step status. Use one of the following: " join(
+      keys(STEP_STATUSES),
+      ", ",
+    )
+    throw(KeyError(step_status))
+  end
+end
+
+"""
+    show_step_statuses()
+
+Show the list of available step statuses to use with `GenericExecutionStats`.
+"""
+function show_step_statuses()
+  println("STEP_STATUSES:")
+  for k in keys(STEP_STATUSES) |> collect |> sort
+    v = STEP_STATUSES[k]
+    @printf("  :%-10s => %s\n", k, v)
+  end
+end
+
 abstract type AbstractExecutionStats end
 
 """
@@ -79,6 +107,7 @@ It contains the following fields:
 - `multipliers_L`: The Lagrange multipliers wrt to the lower bounds on the variables (default: an uninitialized vector like `nlp.meta.x0` if there are bounds, or a zero-length vector if not);
 - `multipliers_U`: The Lagrange multipliers wrt to the upper bounds on the variables (default: an uninitialized vector like `nlp.meta.x0` if there are bounds, or a zero-length vector if not);
 - `iter`: The number of iterations computed by the solver (default: `-1`);
+- `step_status`: The status of the most recently computed step. Use show_step_statuses() for the full list (default: `:unknown`);
 - `elapsed_time`: The elapsed time computed by the solver (default: `Inf`);
 - `solver_specific::Dict{Symbol,Any}`: A solver specific dictionary.
 
@@ -94,6 +123,7 @@ The following fields indicate whether the information above has been updated and
 - `multipliers_reliable` (for `multipliers`)
 - `bounds_multipliers_reliable` (for `multipliers_L` and `multipliers_U`)
 - `iter_reliable`
+- `step_status_reliable`
 - `time_reliable`
 - `solver_specific_reliable`.
 
@@ -127,6 +157,8 @@ mutable struct GenericExecutionStats{T, S, V, Tsp} <: AbstractExecutionStats
   multipliers_U::V # zU
   iter_reliable::Bool
   iter::Int
+  step_status_reliable::Bool
+  step_status::Symbol
   time_reliable::Bool
   elapsed_time::Float64
   solver_specific_reliable::Bool
@@ -143,6 +175,7 @@ function GenericExecutionStats{T, S, V, Tsp}(;
   multipliers_L::V = V(),
   multipliers_U::V = V(),
   iter::Int = -1,
+  step_status::Symbol = :unknown,
   elapsed_time::Real = Inf,
   solver_specific::Dict{Symbol, Tsp} = Dict{Symbol, Any}(),
 ) where {T, S, V, Tsp}
@@ -164,6 +197,8 @@ function GenericExecutionStats{T, S, V, Tsp}(;
     multipliers_U,
     false,
     iter,
+    false,
+    step_status,
     false,
     elapsed_time,
     false,
@@ -187,6 +222,7 @@ function reset!(stats::GenericExecutionStats{T, S, V, Tsp}) where {T, S, V, Tsp}
   stats.multipliers_reliable = false
   stats.bounds_multipliers_reliable = false
   stats.iter_reliable = false
+  stats.step_status_reliable = false
   stats.time_reliable = false
   stats.solver_specific_reliable = false
   stats
@@ -315,6 +351,18 @@ function set_iter!(stats::GenericExecutionStats, iter::Int)
 end
 
 """
+    set_step_status!(stats::GenericExecutionStats, step_status::Symbol)
+
+Register `step_status` as most recent step status in `stats` and mark it as reliable.
+"""
+function set_step_status!(stats::GenericExecutionStats, step_status::Symbol)
+  check_step_status(step_status)
+  stats.step_status = step_status
+  stats.step_status_reliable = true
+  stats
+end
+
+"""
     set_time!(stats::GenericExecutionStats, time::Float64)
 
 Register `time` as optimal solution time in `stats` and mark it as reliable.
@@ -431,6 +479,9 @@ function statsgetfield(stats::AbstractExecutionStats, name::Symbol)
   if name == :status
     v = getStatus(stats)
     t = String
+  elseif name == :step_status
+    v = getStepStatus(stats)
+    t = String
   elseif name in fieldnames(typeof(stats))
     v = getfield(stats, name)
     t = fieldtype(typeof(stats), name)
@@ -456,6 +507,10 @@ end
 
 function getStatus(stats::AbstractExecutionStats)
   return STATUSES[stats.status]
+end
+
+function getStepStatus(stats::AbstractExecutionStats)
+  return STEP_STATUSES[stats.step_status]
 end
 
 """
