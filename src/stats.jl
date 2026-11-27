@@ -7,6 +7,7 @@ export AbstractExecutionStats,
   set_residuals!,
   set_primal_residual!,
   set_dual_residual!,
+  set_complementarity!,
   set_multipliers!,
   set_constraint_multipliers!,
   set_bounds_multipliers!,
@@ -103,6 +104,7 @@ It contains the following fields:
 - `objective`: The objective value at `solution` (default: `Inf`);
 - `dual_feas`: The dual feasibility norm at `solution` (default: `Inf`);
 - `primal_feas`: The primal feasibility norm at `solution` (default: `0.0` if unconstrained, `Inf` otherwise);
+- `complementarity`: The complementarity residual norm at `solution` (default: `0.0` if there are no bounds and no inequality constraints, `Inf` otherwise);
 - `multipliers`: The Lagrange multipliers wrt to the constraints (default: an uninitialized vector like `nlp.meta.y0`);
 - `multipliers_L`: The Lagrange multipliers wrt to the lower bounds on the variables (default: an uninitialized vector like `nlp.meta.x0` if there are bounds, or a zero-length vector if not);
 - `multipliers_U`: The Lagrange multipliers wrt to the upper bounds on the variables (default: an uninitialized vector like `nlp.meta.x0` if there are bounds, or a zero-length vector if not);
@@ -120,6 +122,7 @@ The following fields indicate whether the information above has been updated and
 - `solution_reliable`
 - `objective_reliable`
 - `residuals_reliable` (for `dual_feas` and `primal_feas`)
+- `complementarity_reliable` (for `complementarity`)
 - `multipliers_reliable` (for `multipliers`)
 - `bounds_multipliers_reliable` (for `multipliers_L` and `multipliers_U`)
 - `iter_reliable`
@@ -150,6 +153,8 @@ mutable struct GenericExecutionStats{T, S, V, Tsp} <: AbstractExecutionStats
   dual_feas::T # ‖∇f(x)‖₂ for unc, ‖P[x - ∇f(x)] - x‖₂ for bnd, etc.
   primal_residual_reliable::Bool
   primal_feas::T # ‖c(x)‖ for equalities
+  complementarity_reliable::Bool
+  complementarity::T # complementarity residual for bounds and inequalities
   multipliers_reliable::Bool
   multipliers::S # y
   bounds_multipliers_reliable::Bool
@@ -171,6 +176,7 @@ function GenericExecutionStats{T, S, V, Tsp}(;
   objective::T = T(Inf),
   dual_feas::T = T(Inf),
   primal_feas::T = T(Inf),
+  complementarity::T = T(Inf),
   multipliers::S = S(),
   multipliers_L::V = V(),
   multipliers_U::V = V(),
@@ -190,6 +196,8 @@ function GenericExecutionStats{T, S, V, Tsp}(;
     dual_feas,
     false,
     primal_feas,
+    false,
+    complementarity,
     false,
     multipliers,
     false,
@@ -219,6 +227,7 @@ function reset!(stats::GenericExecutionStats{T, S, V, Tsp}) where {T, S, V, Tsp}
   stats.objective_reliable = false
   stats.primal_residual_reliable = false
   stats.dual_residual_reliable = false
+  stats.complementarity_reliable = false
   stats.multipliers_reliable = false
   stats.bounds_multipliers_reliable = false
   stats.iter_reliable = false
@@ -297,6 +306,20 @@ Register `dual` as optimal dual feasibility residuals in `stats` and mark it as 
 function set_dual_residual!(stats::GenericExecutionStats{T, S, V}, dual::T) where {T, S, V}
   stats.dual_feas = dual
   stats.dual_residual_reliable = true
+  stats
+end
+
+"""
+    set_complementarity!(stats::GenericExecutionStats{T, S, V}, complementarity::T)
+
+Register `complementarity` as optimal complementarity residual in `stats` and mark it as reliable.
+"""
+function set_complementarity!(
+  stats::GenericExecutionStats{T, S, V},
+  complementarity::T,
+) where {T, S, V}
+  stats.complementarity = complementarity
+  stats.complementarity_reliable = true
   stats
 end
 

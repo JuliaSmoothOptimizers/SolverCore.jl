@@ -45,6 +45,8 @@ function test_stats()
       @test typeof(stats.objective) == T
       @test typeof(stats.dual_feas) == T
       @test typeof(stats.primal_feas) == T
+      @test typeof(stats.complementarity) == T
+      @test stats.complementarity == zero(T)
 
       nlp = HS14(T)
 
@@ -55,6 +57,8 @@ function test_stats()
       @test typeof(stats.objective) == T
       @test typeof(stats.dual_feas) == T
       @test typeof(stats.primal_feas) == T
+      @test typeof(stats.complementarity) == T
+      @test stats.complementarity == T(Inf)
 
       S = Vector{T}
       stats = GenericExecutionStats{T, S, S, Any}()
@@ -64,6 +68,7 @@ function test_stats()
       @test typeof(stats.objective) == T
       @test typeof(stats.dual_feas) == T
       @test typeof(stats.primal_feas) == T
+      @test typeof(stats.complementarity) == T
     end
   end
 
@@ -118,6 +123,7 @@ function test_stats()
       "objective",
       "primal_residual",
       "dual_residual",
+      "complementarity",
       "multipliers",
       "bounds_multipliers",
       "iter",
@@ -140,6 +146,9 @@ function test_stats()
     set_residuals!(stats, 1.0e-3, 1.0e-4)
     @test stats.primal_residual_reliable
     @test stats.dual_residual_reliable
+    set_complementarity!(stats, 1.0e-5)
+    @test stats.complementarity_reliable
+    @test stats.complementarity == 1.0e-5
     set_multipliers!(stats, [2 / n], T[], T[])
     @test stats.multipliers_reliable
     @test stats.bounds_multipliers_reliable
